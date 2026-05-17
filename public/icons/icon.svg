@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" rx="112" fill="#000000"/>
+  <g transform="translate(96 160)">
+    <rect x="0" y="0" width="280" height="170" rx="22" fill="#1c1c1e" stroke="#3a3a3c" stroke-width="2"/>
+    <rect x="40" y="-30" width="280" height="170" rx="22" fill="#2c2c2e" stroke="#48484a" stroke-width="2"/>
+    <rect x="80" y="-60" width="280" height="170" rx="22" fill="#ffffff"/>
+    <text x="220" y="50" font-family="Inter, system-ui, -apple-system, Helvetica, Arial" font-weight="800" font-size="64" fill="#000000" text-anchor="middle">Cardte</text>
+  </g>
+</svg>

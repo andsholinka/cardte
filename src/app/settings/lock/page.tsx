@@ -16,8 +16,8 @@ import {
   disableBiometric,
 } from "@/lib/lock";
 
-const PIN_MIN = 4;
-const PIN_MAX = 8;
+const PIN_MIN = 6;
+const PIN_MAX = 6;
 
 export default function LockSetupPage() {
   const { t } = useT();
@@ -38,7 +38,7 @@ export default function LockSetupPage() {
     void isPlatformAuthenticatorAvailable().then(setBioAvailable);
   }, []);
 
-  const onlyDigits = (s: string) => s.replace(/\D/g, "").slice(0, PIN_MAX);
+  const onlyDigits = (s: string) => s.replace(/\D/g, "").slice(0, 6);
 
   /* ---------- enable flow ---------- */
   const enableLock = async (withBio: boolean) => {

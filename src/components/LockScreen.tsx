@@ -14,8 +14,8 @@ type Props = {
   onUnlock: () => void;
 };
 
-const PIN_MAX = 8;
-const PIN_MIN = 4;
+const PIN_MAX = 6;
+const PIN_MIN = 6;
 
 export function LockScreen({ onUnlock }: Props) {
   const { t } = useT();
@@ -70,8 +70,7 @@ export function LockScreen({ onUnlock }: Props) {
     setPin((p) => {
       if (p.length >= PIN_MAX) return p;
       const next = p + d;
-      if (next.length >= PIN_MIN && next.length === PIN_MAX) {
-        // auto-submit at max
+      if (next.length === 6) {
         void submit(next);
       }
       return next;
@@ -113,7 +112,7 @@ export function LockScreen({ onUnlock }: Props) {
           <div
             className={`flex gap-3 ${shake ? "animate-[shake_0.35s_ease]" : ""}`}
           >
-            {Array.from({ length: PIN_MAX }).map((_, i) => {
+            {Array.from({ length: 6 }).map((_, i) => {
               const filled = i < pin.length;
               return (
                 <span

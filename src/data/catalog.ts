@@ -75,10 +75,10 @@ export const BANKS: CatalogCard[] = [
   { id: "panin-dubai-syariah", name: "Panin Dubai Syariah", category: "bank", bg: "#0072CE", label: "Panin", sub: "Dubai Syariah", style: "wordmark" },
 
   // Bank digital
-  { id: "seabank", name: "SeaBank", category: "bank", bg: "#FF7A00", label: "SeaBank", style: "wordmark" },
-  { id: "blu", name: "blu by BCA Digital", category: "bank", bg: "#00B7C7", label: "blu", style: "wordmark" },
+  { id: "seabank", name: "SeaBank", category: "bank", bg: "#FF7A00", label: "SeaBank", style: "wordmark", logo: "/logo/seabank.png", logoWhite: true, logoClass: "scale-[3]" },
+  { id: "blu", name: "Blu by BCA Digital", category: "bank", bg: "#00B7C7", label: "Blu", style: "wordmark", logo: "/logo/blu.png", logoWhite: false, logoClass: "scale-[2.2]" },
   { id: "neo", name: "Bank Neo Commerce", category: "bank", bg: "#FFC107", fg: "#000000", label: "neo+", style: "wordmark" },
-  { id: "jago", name: "Bank Jago", category: "bank", bg: "#F58220", label: "jago", style: "wordmark" },
+  { id: "jago", name: "Bank Jago", category: "bank", bg: "#FFFFFF", fg: "#000000", label: "jago", style: "wordmark", logo: "/logo/jago.png" },
   { id: "allo", name: "Allo Bank", category: "bank", bg: "#E91E63", label: "allo", style: "wordmark" },
   { id: "linebank", name: "LINE Bank by Hana", category: "bank", bg: "#06C755", label: "LINE Bank", style: "wordmark" },
   { id: "krom", name: "Krom Bank", category: "bank", bg: "#5E17EB", label: "krom", style: "wordmark" },

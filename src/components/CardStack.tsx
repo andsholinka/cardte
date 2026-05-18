@@ -15,34 +15,29 @@ type Props = {
 };
 
 const LONG_PRESS_MS = 500;
-const CARD_HEIGHT = 200;
-const PEEK = 50; // how much of each card below peeks out
 
 /**
- * Apple Wallet-style stacked cards.
- * All cards overlap with only PEEK pixels showing for each subsequent card.
- * The whole stack is scrollable — as you scroll, the top card slides up
- * revealing the next card fully. Simple, clean, no weird 3D distortion.
+ * Apple Wallet-style card stack using CSS sticky positioning.
+ *
+ * Each card is `position: sticky` with an increasing `top` value.
+ * This creates the natural "stack and peel" effect:
+ * - All cards overlap initially, each peeking below the previous
+ * - As you scroll, the top card peels away revealing the next
+ * - The next card "sticks" in place until you scroll further
+ *
+ * No JS scroll calculations needed — pure CSS does the heavy lifting.
  */
 export function CardStack({ cards, onOpen }: Props) {
   const { t } = useT();
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [scrollY, setScrollY] = useState(0);
   const [mounted, setMounted] = useState(false);
   const pressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pressStartPos = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const didLongPress = useRef(false);
 
   useEffect(() => {
-    const t = setTimeout(() => setMounted(true), 30);
-    return () => clearTimeout(t);
+    const timer = setTimeout(() => setMounted(true), 50);
+    return () => clearTimeout(timer);
   }, []);
-
-  const onScroll = () => {
-    if (containerRef.current) {
-      setScrollY(containerRef.current.scrollTop);
-    }
-  };
 
   const handlePointerDown = useCallback(
     (card: SavedCard, e: React.PointerEvent) => {
@@ -90,66 +85,79 @@ export function CardStack({ cards, onOpen }: Props) {
     }
   }, []);
 
-  // Total scrollable height: first card full + rest just PEEK each
-  const totalHeight = CARD_HEIGHT + (cards.length - 1) * PEEK;
-
   return (
     <div
-      ref={containerRef}
-      onScroll={onScroll}
-      className="no-scrollbar relative mx-5 overflow-y-auto overscroll-contain rounded-3xl"
-      style={{ height: `min(${totalHeight + 20}px, 70dvh)` }}
+      className="no-scrollbar relative mx-5 overflow-y-auto overscroll-contain rounded-2xl"
+      style={{ height: "min(500px, 65dvh)" }}
     >
-      <div style={{ height: `${totalHeight}px`, position: "relative" }}>
-        {cards.map((card, i) => {
-          const tile = getTile(card);
+      {cards.map((card, i) => {
+        const tile = getTile(card);
+        const entranceDelay = i * 70;
 
-          // Each card's resting position
-          const restY = i * PEEK;
-
-          // How much this card has been scrolled past
-          const scrolled = Math.max(0, scrollY - restY);
-          // The card "sticks" at its position until scrolled, then slides up
-          const y = Math.max(restY, restY + scrollY * 0 /* stays put */);
-
-          // Scale: cards further down are slightly smaller
-          const depth = i / Math.max(1, cards.length - 1);
-          const scale = 1 - depth * 0.03;
-
-          // Entrance
-          const entranceDelay = i * 70;
-
-          return (
-            <div
-              key={card.uid}
-              onPointerDown={(e) => handlePointerDown(card, e)}
-              onPointerUp={() => handlePointerUp(card)}
-              onPointerMove={handlePointerMove}
-              onPointerLeave={handlePointerCancel}
-              onPointerCancel={handlePointerCancel}
-              onContextMenu={(e) => e.preventDefault()}
-              className="absolute left-0 right-0 cursor-pointer select-none overflow-hidden rounded-2xl"
-              style={{
-                top: `${restY}px`,
-                height: `${CARD_HEIGHT}px`,
-                transform: mounted
-                  ? `scale(${scale})`
-                  : `translateY(${40 + i * 15}px) scale(0.92)`,
-                transformOrigin: "50% 0%",
-                opacity: mounted ? 1 : 0,
-                zIndex: cards.length - i,
-                transition: mounted
-                  ? "transform 0.2s ease, box-shadow 0.2s ease"
-                  : `transform 0.5s cubic-bezier(0.22, 1, 0.36, 1) ${entranceDelay}ms,
-                     opacity 0.4s ease ${entranceDelay}ms`,
-                boxShadow: `0 ${2 + (cards.length - i) * 2}px ${8 + (cards.length - i) * 4}px rgba(0,0,0,0.4)`,
-              }}
-            >
-              <CardTile card={tile} size="lg" />
-            </div>
-          );
-        })}
-      </div>
+        return (
+          <div
+            key={card.uid}
+            onPointerDown={(e) => handlePointerDown(card, e)}
+            onPointerUp={() => handlePointerUp(card)}
+            onPointerMove={handlePointerMove}
+            onPointerLeave={handlePointerCancel}
+            onPointerCancel={handlePointerCancel}
+            onContextMenu={(e) => e.preventDefault()}
+            className="card-stack-item sticky cursor-pointer select-none overflow-hidden rounded-2xl"
+            style={{
+              top: `${i * 16}px`,
+              height: "160px",
+              marginBottom: "-80px",
+              opacity: mounted ? 1 : 0,
+              transform: mounted ? "translateY(0)" : `translateY(${40 + i * 15}px)`,
+              transition: mounted
+                ? "transform 0.2s ease, opacity 0.2s ease"
+                : `transform 0.55s cubic-bezier(0.22, 1, 0.36, 1) ${entranceDelay}ms,
+                   opacity 0.4s ease ${entranceDelay}ms`,
+              zIndex: cards.length + 10 - i,
+              boxShadow: "0 4px 20px rgba(0,0,0,0.5), 0 1px 4px rgba(0,0,0,0.3)",
+            }}
+          >
+            <CardTile card={tile} size="lg" />
+            {/* Name label at bottom — only show if card has no logo (logo already identifies the card) */}
+            {!tile.logo && (
+              <div
+                className="absolute inset-x-0 bottom-0 flex items-end justify-between px-4 pb-3 pt-10"
+                style={{
+                  background: `linear-gradient(to top, ${tile.bg}ee 30%, transparent)`,
+                }}
+              >
+                <span
+                  className="text-sm font-bold drop-shadow-sm"
+                  style={{ color: tile.fg ?? "#fff" }}
+                >
+                  {card.name}
+                </span>
+                {card.number && (
+                  <span
+                    className="font-mono text-[11px] opacity-70"
+                    style={{ color: tile.fg ?? "#fff" }}
+                  >
+                    •••• {card.number.slice(-4)}
+                  </span>
+                )}
+              </div>
+            )}
+            {tile.logo && card.number && (
+              <div className="absolute bottom-2 right-3">
+                <span
+                  className="font-mono text-[10px] opacity-60"
+                  style={{ color: tile.fg ?? "#fff" }}
+                >
+                  •••• {card.number.slice(-4)}
+                </span>
+              </div>
+            )}
+          </div>
+        );
+      })}
+      {/* Bottom spacer so last card can be scrolled into full view */}
+      <div style={{ height: "120px", flexShrink: 0 }} />
     </div>
   );
 }

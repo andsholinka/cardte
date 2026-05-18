@@ -6,13 +6,13 @@ const config: Config = {
     extend: {
       colors: {
         bg: "#000000",
-        surface: "#1c1c1e",
-        surface2: "#2c2c2e",
-        muted: "#8e8e93",
-        line: "#2c2c2e",
+        surface: "#111111",
+        surface2: "#1a1a1a",
+        muted: "#666666",
+        line: "#1a1a1a",
       },
       fontFamily: {
-        sans: ["var(--font-sans)", "system-ui", "sans-serif"],
+        sans: ["var(--font-sans)", "Inter", "system-ui", "-apple-system", "sans-serif"],
       },
     },
   },

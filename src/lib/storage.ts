@@ -17,6 +17,8 @@ export type SavedCard = {
   barcode?: string;
   /** optional pin/note */
   note?: string;
+  /** whether this is the premium hero card */
+  isHero?: boolean;
   /** custom card visual (used when catalogId === "custom") */
   custom?: {
     bg: string;
@@ -79,7 +81,11 @@ export function useSavedCards() {
   }, []);
 
   const update = useCallback((uid: string, patch: Partial<SavedCard>) => {
-    const all = readAll().map((c) => (c.uid === uid ? { ...c, ...patch } : c));
+    let all = readAll();
+    if (patch.isHero) {
+      all = all.map((c) => ({ ...c, isHero: false }));
+    }
+    all = all.map((c) => (c.uid === uid ? { ...c, ...patch } : c));
     writeAll(all);
   }, []);
 

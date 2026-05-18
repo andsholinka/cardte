@@ -5,19 +5,15 @@ import { useEffect, useRef, useState } from "react";
 
 type Pos = { x: number; y: number };
 const STORAGE_KEY = "cardte:fab:pos";
-const SIZE = 56;
+const SIZE = 52;
 const MARGIN = 12;
-const NAV_RESERVE = 96; // ruang utk bottom nav (di-anchor dari bawah)
+const NAV_RESERVE = 96;
 
 type Props = {
   onClick: () => void;
   ariaLabel?: string;
 };
 
-/**
- * Floating, draggable Add button. Posisinya di-persist ke localStorage.
- * Default: pojok kanan-bawah, melayang di atas semua konten (di bawah modal).
- */
 export function FloatingAddButton({ onClick, ariaLabel }: Props) {
   const ref = useRef<HTMLButtonElement>(null);
   const [pos, setPos] = useState<Pos | null>(null);
@@ -30,7 +26,6 @@ export function FloatingAddButton({ onClick, ariaLabel }: Props) {
     pointerId: number | null;
   } | null>(null);
 
-  // Init position dari storage atau default kanan-bawah
   useEffect(() => {
     const init = () => {
       const vw = window.innerWidth;
@@ -100,7 +95,6 @@ export function FloatingAddButton({ onClick, ariaLabel }: Props) {
       ref.current?.releasePointerCapture(e.pointerId);
     } catch {}
     if (wasDrag) {
-      // Snap ke sisi terdekat (kiri/kanan), tetap respect margin atas/bawah
       setPos((p) => {
         if (!p) return p;
         const vw = window.innerWidth;
@@ -131,7 +125,7 @@ export function FloatingAddButton({ onClick, ariaLabel }: Props) {
       onPointerCancel={onPointerUp}
       onContextMenu={(e) => e.preventDefault()}
       aria-label={ariaLabel ?? "Add"}
-      className="fixed z-40 flex items-center justify-center rounded-full bg-gradient-to-br from-white to-white/75 text-black shadow-[0_18px_40px_-10px_rgba(255,255,255,0.35),0_8px_20px_-6px_rgba(0,0,0,0.6)] active:scale-95"
+      className="fixed z-40 flex items-center justify-center rounded-full border border-white/15 bg-white text-black shadow-[0_12px_32px_-8px_rgba(255,255,255,0.15),0_4px_12px_-4px_rgba(0,0,0,0.8)] active:scale-95"
       style={{
         width: SIZE,
         height: SIZE,
@@ -141,16 +135,7 @@ export function FloatingAddButton({ onClick, ariaLabel }: Props) {
         transition: drag.current ? "none" : "left 220ms ease, top 220ms ease",
       }}
     >
-      <span
-        aria-hidden
-        className="pointer-events-none absolute inset-0 rounded-full"
-        style={{
-          background:
-            "radial-gradient(circle at 30% 25%, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0) 55%)",
-          mixBlendMode: "screen",
-        }}
-      />
-      <Plus size={26} strokeWidth={2.6} />
+      <Plus size={24} strokeWidth={2.4} />
     </button>
   );
 }

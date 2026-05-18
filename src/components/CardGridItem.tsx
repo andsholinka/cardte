@@ -18,7 +18,7 @@ export function CardGridItem({ card, onOpen, onEdit }: Props) {
   const { t } = useT();
   const catalog = findCatalog(card.catalogId);
   const tile = catalog ?? {
-    bg: card.custom?.bg ?? "#2c2c2e",
+    bg: card.custom?.bg ?? "#222",
     fg: card.custom?.fg,
     label: card.custom?.label ?? card.name,
     style: "wordmark" as const,
@@ -50,36 +50,27 @@ export function CardGridItem({ card, onOpen, onEdit }: Props) {
         className="block w-full text-left"
         aria-label={t("grid.copy_aria", { name: card.name })}
       >
-        <div className="relative overflow-hidden rounded-[14px] p-[1px] transition active:scale-[0.97]">
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-0 rounded-[14px] opacity-80"
-            style={{
-              background: `linear-gradient(140deg, ${tile.bg}aa 0%, rgba(255,255,255,0.08) 50%, ${tile.bg}66 100%)`,
-            }}
-          />
-          <div className="relative rounded-[13px] bg-black">
-            <CardTile card={tile} />
-          </div>
+        <div className="relative overflow-hidden rounded-2xl border border-white/[0.06] transition active:scale-[0.97]">
+          <CardTile card={tile} />
         </div>
-        <p className="mt-1.5 truncate text-[11px] font-medium text-white/85">
+        <p className="mt-1.5 truncate text-[11px] font-medium text-white/80">
           {card.name}
         </p>
         {card.number ? (
-          <p className="truncate text-[10px] text-muted">
+          <p className="truncate font-mono text-[10px] text-white/35">
             •••• {card.number.slice(-4)}
           </p>
         ) : (
-          <p className="text-[10px] text-muted">{t("grid.no_number")}</p>
+          <p className="text-[10px] text-white/30">{t("grid.no_number")}</p>
         )}
       </button>
 
       <button
         onClick={handleEdit}
         aria-label={t("grid.edit_aria", { name: card.name })}
-        className="absolute right-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-black/60 text-white/90 opacity-90 backdrop-blur transition active:scale-90"
+        className="absolute right-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-full border border-white/10 bg-black/70 text-white/80 backdrop-blur transition active:scale-90"
       >
-        <Pencil size={11} />
+        <Pencil size={10} />
       </button>
     </div>
   );

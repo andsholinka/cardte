@@ -1,7 +1,14 @@
 import type { Metadata, Viewport } from "next";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import { ToastHost } from "@/components/Toast";
 import { I18nProvider } from "@/lib/i18n";
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-sans",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "Cardte — Simpan Kartumu di Satu Tempat",
@@ -16,10 +23,10 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
-      { url: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
+      { url: "/logo/logo.png", sizes: "192x192", type: "image/png" },
+      { url: "/logo/logo.png", sizes: "512x512", type: "image/png" },
     ],
-    apple: [{ url: "/icons/icon-192.png", sizes: "192x192" }],
+    apple: [{ url: "/logo/logo.png", sizes: "192x192" }],
   },
 };
 
@@ -38,8 +45,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="id">
-      <body className="bg-bg text-white antialiased">
+    <html lang="id" className={inter.variable}>
+      <body className="bg-black text-white font-sans antialiased">
         <I18nProvider>
           <div className="mx-auto min-h-[100dvh] max-w-md">{children}</div>
           <ToastHost />

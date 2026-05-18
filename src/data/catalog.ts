@@ -14,6 +14,12 @@ export type CatalogCard = {
   label: string;
   /** Optional sublabel under main label */
   sub?: string;
+  /** Optional URL to exact brand logo (e.g., SVG from Wikimedia) */
+  logo?: string;
+  /** Set to true to invert logo to pure white */
+  logoWhite?: boolean;
+  /** Custom utility classes for the logo (e.g. scaling) */
+  logoClass?: string;
 };
 
 /* ============================================================
@@ -24,10 +30,10 @@ export type CatalogCard = {
  * ============================================================ */
 export const BANKS: CatalogCard[] = [
   // BUMN & swasta besar
-  { id: "bca", name: "BCA", category: "bank", bg: "#0060A8", label: "BCA", style: "wordmark" },
-  { id: "mandiri", name: "Mandiri", category: "bank", bg: "#003D79", label: "mandiri", style: "wordmark" },
-  { id: "bri", name: "BRI", category: "bank", bg: "#00529C", label: "BRI", style: "wordmark" },
-  { id: "bni", name: "BNI", category: "bank", bg: "#F26522", label: "BNI", style: "wordmark" },
+  { id: "bca", name: "BCA", category: "bank", bg: "#0060A8", label: "BCA", style: "wordmark", logo: "https://upload.wikimedia.org/wikipedia/commons/5/5c/Bank_Central_Asia.svg", logoWhite: true },
+  { id: "mandiri", name: "Mandiri", category: "bank", bg: "#003D79", label: "mandiri", style: "wordmark", logo: "https://upload.wikimedia.org/wikipedia/commons/a/a2/Logo_Bank_Mandiri.svg", logoWhite: true },
+  { id: "bri", name: "BRI", category: "bank", bg: "#00529C", label: "BRI", style: "wordmark", logo: "https://upload.wikimedia.org/wikipedia/commons/2/2e/BRI_2020.svg", logoWhite: true },
+  { id: "bni", name: "BNI", category: "bank", bg: "#F26522", label: "BNI", style: "wordmark", logo: "/logo/bni.png", logoWhite: false, logoClass: "scale-[2.5]" },
   { id: "btn", name: "BTN", category: "bank", bg: "#003F7F", label: "BTN", sub: "Bank BTN", style: "wordmark" },
   { id: "cimb", name: "CIMB Niaga", category: "bank", bg: "#A6192E", label: "CIMB", sub: "Niaga", style: "wordmark" },
   { id: "danamon", name: "Danamon", category: "bank", bg: "#F58220", label: "Danamon", style: "wordmark" },
@@ -113,7 +119,7 @@ export const BANKS: CatalogCard[] = [
  * ============================================================ */
 export const MEMBERS: CatalogCard[] = [
   /* ---------- Minimarket & supermarket ---------- */
-  { id: "alfamart", name: "Alfamart", category: "member", bg: "#E30613", label: "Alfamart", style: "wordmark" },
+  { id: "alfamart", name: "Alfamart", category: "member", bg: "#E30613", label: "Alfamart", style: "wordmark", logo: "https://upload.wikimedia.org/wikipedia/commons/8/86/Alfamart_logo.svg", logoWhite: true },
   { id: "alfamidi", name: "Alfamidi", category: "member", bg: "#E30613", label: "Alfamidi", style: "wordmark" },
   { id: "indomaret", name: "Indomaret", category: "member", bg: "#005BAA", label: "Indomaret", style: "wordmark" },
   { id: "lawson", name: "Lawson", category: "member", bg: "#005BAA", label: "LAWSON", style: "wordmark" },
@@ -161,8 +167,8 @@ export const MEMBERS: CatalogCard[] = [
   { id: "yongki", name: "Yongki Komaladi", category: "member", bg: "#A6192E", label: "Yongki Komaladi", style: "wordmark" },
   { id: "fladeo", name: "Fladeo", category: "member", bg: "#1A1A1A", label: "Fladeo", style: "wordmark" },
   { id: "bata", name: "Bata", category: "member", bg: "#E30613", label: "Bata", style: "wordmark" },
-  { id: "nike", name: "Nike", category: "member", bg: "#000000", label: "✓ Nike", style: "wordmark" },
-  { id: "adidas", name: "Adidas", category: "member", bg: "#000000", label: "adidas", style: "wordmark" },
+  { id: "nike", name: "Nike", category: "member", bg: "#000000", label: "✓ Nike", style: "wordmark", logoWhite: true },
+  { id: "adidas", name: "Adidas", category: "member", bg: "#000000", label: "adidas", style: "wordmark", logo: "https://upload.wikimedia.org/wikipedia/commons/2/20/Adidas_Logo.svg", logoWhite: true },
   { id: "puma", name: "Puma", category: "member", bg: "#000000", label: "PUMA", style: "wordmark" },
   { id: "reebok", name: "Reebok", category: "member", bg: "#000000", label: "Reebok", style: "wordmark" },
   { id: "converse", name: "Converse", category: "member", bg: "#000000", label: "Converse", style: "wordmark" },
@@ -211,7 +217,7 @@ export const MEMBERS: CatalogCard[] = [
   { id: "samsung-store", name: "Samsung Experience Store", category: "member", bg: "#1428A0", label: "SAMSUNG", style: "wordmark" },
 
   /* ---------- F&B: kopi & teh ---------- */
-  { id: "starbucks", name: "Starbucks", category: "member", bg: "#006241", label: "Starbucks", style: "wordmark" },
+  { id: "starbucks", name: "Starbucks", category: "member", bg: "#006241", label: "Starbucks", style: "wordmark", logo: "https://cdn.simpleicons.org/starbucks/white" },
   { id: "kopi-kenangan", name: "Kopi Kenangan", category: "member", bg: "#7A2E20", label: "Kopi Kenangan", style: "wordmark" },
   { id: "janji-jiwa", name: "Janji Jiwa", category: "member", bg: "#1F3F1A", label: "Janji Jiwa", style: "wordmark" },
   { id: "fore", name: "Fore Coffee", category: "member", bg: "#0E5B3A", label: "fore.", style: "wordmark" },

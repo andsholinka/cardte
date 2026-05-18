@@ -39,28 +39,22 @@ export default function AccountPage() {
       className="ambient-bg relative min-h-[100dvh] pb-32"
       style={{ paddingTop: "calc(env(safe-area-inset-top) + 8px)" }}
     >
-      <header className="relative z-10 px-5 pt-2">
-        <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-muted">
-          {t("account.kicker")}
-        </p>
-      </header>
-
       {/* Privacy hero */}
       <section className="relative z-10 mx-5 mt-4">
-        <div className="glass relative overflow-hidden rounded-3xl p-5">
-          <div
-            aria-hidden
-            className="pointer-events-none absolute -right-12 -top-12 h-36 w-36 rounded-full bg-emerald-400/30 blur-3xl"
-          />
-          <div className="relative flex items-start gap-3">
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/15 text-emerald-300">
-              <ShieldCheck size={20} />
-            </span>
-            <div>
-              <h3 className="text-sm font-semibold">
+        <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-b from-white/[0.07] to-transparent p-5 shadow-2xl backdrop-blur-xl">
+          {/* Subtle background glow */}
+          <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-emerald-500/20 blur-[40px] pointer-events-none" />
+          <div className="absolute -bottom-10 -left-10 h-32 w-32 rounded-full bg-teal-500/10 blur-[40px] pointer-events-none" />
+
+          <div className="relative flex items-start gap-4">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-emerald-500/20 bg-gradient-to-br from-emerald-500/20 to-emerald-600/5 text-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.15)]">
+              <ShieldCheck size={24} strokeWidth={2} />
+            </div>
+            <div className="flex-1 pt-0.5">
+              <h3 className="text-[15px] font-bold tracking-tight text-white">
                 {t("account.privacy_title")}
               </h3>
-              <p className="mt-1 text-xs leading-relaxed text-muted">
+              <p className="mt-1.5 text-[13px] leading-relaxed text-white/60">
                 {t("account.privacy_body")}
               </p>
             </div>
@@ -68,15 +62,6 @@ export default function AccountPage() {
         </div>
       </section>
 
-      {/* Stats */}
-      <section className="relative z-10 mx-5 mt-3">
-        <div className="glass flex items-center justify-between rounded-2xl px-4 py-4">
-          <span className="text-sm text-muted">{t("account.saved_count")}</span>
-          <span className="text-2xl font-bold tracking-tight">
-            {cards.length}
-          </span>
-        </div>
-      </section>
 
       {/* Language */}
       <section className="relative z-10 mx-5 mt-3 overflow-hidden rounded-2xl glass">
@@ -85,12 +70,12 @@ export default function AccountPage() {
           className="flex w-full items-center justify-between px-4 py-3.5 active:bg-white/5"
         >
           <span className="flex items-center gap-3 text-sm">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/8">
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/5">
               <Languages size={18} />
             </span>
             {t("account.language")}
           </span>
-          <span className="flex items-center gap-2 text-sm text-muted">
+          <span className="flex items-center gap-2 text-sm text-white/40">
             {langLabel}
             <ChevronRight
               size={16}
@@ -140,9 +125,7 @@ export default function AccountPage() {
         </p>
       )}
 
-      <p className="relative z-10 mt-8 text-center text-[11px] text-muted">
-        Cardte {t("account.footer")}
-      </p>
+
 
       <BottomNav />
     </main>

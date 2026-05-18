@@ -41,53 +41,27 @@ export function HeroCard({ cards, onEdit, onOpen }: Props) {
 
   return (
     <section className="relative px-5">
+      {/* Mono glow */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-x-10 top-2 h-44 rounded-[40px] opacity-60 blur-2xl"
-        style={{ background: tile.bg }}
+        className="pointer-events-none absolute inset-x-12 top-4 h-40 rounded-[40px] bg-white/[0.03] blur-2xl"
       />
 
-      <div
-        className="relative overflow-hidden rounded-[28px] p-[1.5px]"
-        style={{
-          background: `linear-gradient(135deg, ${tile.bg}aa 0%, rgba(255,255,255,0.18) 50%, ${tile.bg}88 100%)`,
-        }}
-      >
-        <div
-          className="shine relative overflow-hidden rounded-[26px] p-5"
-          style={{
-            background:
-              "linear-gradient(160deg, rgba(28,28,30,0.95) 0%, rgba(18,18,22,0.95) 100%)",
-          }}
-        >
-          <div
-            aria-hidden
-            className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full opacity-40 blur-2xl"
-            style={{ background: tile.bg }}
-          />
-
-          <div className="relative z-10 flex items-start justify-between">
-            <div
-              className="rounded-full px-3 py-1 text-[11px] font-bold tracking-wide"
-              style={{
-                background: `${tile.bg}33`,
-                color: "#fff",
-                border: `1px solid ${tile.bg}66`,
-              }}
+      {/* Card container with border */}
+      <div className="relative overflow-hidden rounded-[24px] border border-white/[0.08] bg-[#0a0a0a]">
+        <div className="shine relative p-5">
+          {/* Top row */}
+          <div className="relative z-10 flex items-start justify-end">
+            <button
+              onClick={() => onEdit(active)}
+              className="flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/80 active:scale-95"
+              aria-label={t("detail.edit")}
             >
-              {active.name}
-            </div>
-            <div className="flex items-center gap-1.5">
-              <button
-                onClick={() => onEdit(active)}
-                className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-white/90 active:scale-95"
-                aria-label={t("detail.edit")}
-              >
-                <Pencil size={14} />
-              </button>
-            </div>
+              <Pencil size={13} />
+            </button>
           </div>
 
+          {/* Brand visual */}
           <button
             onClick={onCopy}
             onContextMenu={(e) => {
@@ -97,47 +71,54 @@ export function HeroCard({ cards, onEdit, onOpen }: Props) {
             className="relative z-10 mt-4 block w-full overflow-hidden rounded-2xl text-left active:scale-[0.99]"
           >
             <div
-              className="flex h-28 items-center justify-center"
+              className="flex h-28 items-center justify-center border border-white/[0.06]"
               style={{
-                background: `linear-gradient(140deg, ${shade(tile.bg, 25)} 0%, ${tile.bg} 50%, ${shade(tile.bg, -28)} 100%)`,
-                color: tile.fg,
-                boxShadow:
-                  "inset 0 1px 0 0 rgba(255,255,255,0.18), inset 0 -1px 0 0 rgba(0,0,0,0.25)",
+                background: `linear-gradient(140deg, #262626 0%, #000000 100%)`,
+                color: "#ffffff",
               }}
             >
-              <span
-                className="text-3xl font-extrabold tracking-tight"
-                style={{ textShadow: "0 1px 1px rgba(0,0,0,0.2)" }}
-              >
-                {tile.label.split("\n").join(" ")}
-              </span>
+              {tile.logo ? (
+                <img
+                  src={tile.logo}
+                  alt={tile.label}
+                  className={`h-full w-full max-h-[60%] max-w-[80%] object-contain drop-shadow-md ${
+                    tile.logoWhite ? "brightness-0 invert" : ""
+                  } ${tile.logoClass || ""}`}
+                />
+              ) : (
+                <span className="text-3xl font-bold tracking-tight">
+                  {tile.label.split("\n").join(" ")}
+                </span>
+              )}
             </div>
           </button>
 
-          <div className="relative z-10 mt-4 flex items-end justify-between gap-3">
+          {/* Number + copy */}
+          <div className="relative z-10 mt-5 flex items-end justify-between gap-3">
             <div className="min-w-0 flex-1">
-              <p className="text-[10px] uppercase tracking-[0.18em] text-muted">
+              <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-white/40">
                 {t("hero.card_number")}
               </p>
-              <p className="mt-1 truncate font-mono text-xl font-bold tracking-wider">
+              <p className="mt-1.5 truncate font-mono text-xl font-semibold tracking-wider text-white/90">
                 {formatNumber(active.number) || "•••• •••• •••• ••••"}
               </p>
               {active.holder && (
-                <p className="mt-1 text-xs text-muted">
+                <p className="mt-1 text-xs text-white/40">
                   {t("hero.holder_prefix")} {active.holder}
                 </p>
               )}
             </div>
             <button
               onClick={onCopy}
-              className="flex shrink-0 items-center gap-1.5 rounded-full bg-white px-4 py-2 text-xs font-bold uppercase tracking-wider text-black active:scale-95"
+              className="flex shrink-0 items-center gap-1.5 rounded-full border border-white/15 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-wider text-black active:scale-95"
             >
-              <Copy size={13} /> {t("hero.copy")}
+              <Copy size={12} /> {t("hero.copy")}
             </button>
           </div>
         </div>
       </div>
 
+      {/* Pager */}
       {cards.length > 1 && (
         <div className="mt-3 flex items-center justify-between px-1">
           <div className="flex items-center gap-1.5">
@@ -149,23 +130,23 @@ export function HeroCard({ cards, onEdit, onOpen }: Props) {
                 className={`h-1.5 rounded-full transition-all ${
                   i === idx
                     ? "w-5 bg-white"
-                    : "w-1.5 bg-white/25 active:bg-white/40"
+                    : "w-1.5 bg-white/20 active:bg-white/30"
                 }`}
               />
             ))}
           </div>
-          <div className="flex items-center gap-2 text-muted">
+          <div className="flex items-center gap-2">
             <button
               onClick={prev}
               aria-label={t("hero.prev")}
-              className="flex h-7 w-7 items-center justify-center rounded-full bg-white/5 active:bg-white/10"
+              className="flex h-7 w-7 items-center justify-center rounded-full border border-white/10 text-white/50 active:bg-white/5"
             >
               <ChevronLeft size={14} />
             </button>
             <button
               onClick={next}
               aria-label={t("hero.next")}
-              className="flex h-7 w-7 items-center justify-center rounded-full bg-white/5 active:bg-white/10"
+              className="flex h-7 w-7 items-center justify-center rounded-full border border-white/10 text-white/50 active:bg-white/5"
             >
               <ChevronRight size={14} />
             </button>
@@ -180,11 +161,14 @@ function pickTile(card: SavedCard) {
   const c = findCatalog(card.catalogId);
   if (c) return c;
   return {
-    bg: card.custom?.bg ?? "#3a3a3c",
+    bg: card.custom?.bg ?? "#222",
     fg: card.custom?.fg ?? "#fff",
     label: card.custom?.label ?? card.name,
     style: "wordmark" as const,
     sub: undefined,
+    logo: undefined,
+    logoWhite: undefined,
+    logoClass: undefined,
   };
 }
 

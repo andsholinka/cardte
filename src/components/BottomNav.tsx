@@ -2,49 +2,57 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { CreditCard, Tag, User } from "lucide-react";
+import { WalletCards, Plus, Settings2 } from "lucide-react";
 import { useT } from "@/lib/i18n";
 
-export function BottomNav() {
+type Props = {
+  onAdd?: () => void;
+};
+
+export function BottomNav({ onAdd }: Props) {
   const { t } = useT();
   const pathname = usePathname();
 
-  const items = [
-    { href: "/", label: t("nav.cards"), icon: CreditCard },
-    { href: "/offers", label: t("nav.offers"), icon: Tag },
-    { href: "/account", label: t("nav.account"), icon: User },
-  ];
+  const isCards = pathname === "/";
+  const isAccount = pathname?.startsWith("/account");
 
   return (
-    <nav
-      className="fixed inset-x-0 bottom-0 z-30 mx-auto max-w-md px-4"
-      style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 12px)" }}
+    <div
+      className="fixed inset-x-0 bottom-6 z-30 mx-auto w-full max-w-[300px] px-4"
+      style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
-      <ul className="glass relative flex items-center justify-around rounded-2xl px-2 py-1.5 shadow-[0_10px_30px_-12px_rgba(0,0,0,0.7)]">
-        {items.map(({ href, label, icon: Icon }) => {
-          const active =
-            href === "/" ? pathname === "/" : pathname?.startsWith(href);
-          return (
-            <li key={href} className="flex-1">
-              <Link
-                href={href}
-                className={`relative flex flex-col items-center justify-center gap-0.5 rounded-xl px-2 py-2 text-[11px] transition ${
-                  active ? "text-white" : "text-muted"
-                }`}
-              >
-                {active && (
-                  <span
-                    aria-hidden
-                    className="absolute inset-x-3 -top-px h-0.5 rounded-full bg-white"
-                  />
-                )}
-                <Icon size={20} strokeWidth={active ? 2.4 : 1.8} />
-                <span className={active ? "font-semibold" : ""}>{label}</span>
-              </Link>
-            </li>
-          );
-        })}
-      </ul>
-    </nav>
+      <nav className="relative flex h-[64px] w-full items-center justify-between rounded-full border border-white/20 bg-white/[0.12] px-4 shadow-[0_8px_32px_rgba(0,0,0,0.5)] backdrop-blur-xl saturate-[150%]">
+        {/* Left: Cards */}
+        <Link
+          href="/"
+          className={`flex w-16 h-full items-center justify-center transition active:scale-95 ${
+            isCards ? "text-white drop-shadow-[0_2px_10px_rgba(255,255,255,0.4)]" : "text-white/40"
+          }`}
+          aria-label={t("nav.cards")}
+        >
+          <WalletCards size={24} strokeWidth={isCards ? 2.2 : 1.7} />
+        </Link>
+
+        {/* Center: Add Button */}
+        <button
+          onClick={onAdd}
+          aria-label={t("home.add_card_aria")}
+          className="flex h-[48px] w-[48px] items-center justify-center rounded-full bg-white text-black shadow-lg transition active:scale-95"
+        >
+          <Plus size={26} strokeWidth={2.5} />
+        </button>
+
+        {/* Right: Account */}
+        <Link
+          href="/account"
+          className={`flex w-16 h-full items-center justify-center transition active:scale-95 ${
+            isAccount ? "text-white drop-shadow-[0_2px_10px_rgba(255,255,255,0.4)]" : "text-white/40"
+          }`}
+          aria-label={t("nav.account")}
+        >
+          <Settings2 size={24} strokeWidth={isAccount ? 2.2 : 1.7} />
+        </Link>
+      </nav>
+    </div>
   );
 }

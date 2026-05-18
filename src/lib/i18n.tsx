@@ -21,7 +21,7 @@ const id = {
   // Bottom nav
   "nav.cards": "Cards",
   "nav.offers": "Offers",
-  "nav.account": "Account",
+  "nav.account": "Pengaturan",
 
   // Home
   "home.featured": "Pilihan",
@@ -90,7 +90,7 @@ const id = {
   "field.number_optional": "Nomor / ID kartu (opsional)",
   "field.number_placeholder": "cth. 1234567890",
   "field.holder": "Atas nama",
-  "field.holder_placeholder": "cth. Nauval",
+  "field.holder_placeholder": "cth. Cardte",
   "field.note": "Catatan",
   "field.note_placeholder": "Tambahkan catatan (opsional)",
 
@@ -138,7 +138,7 @@ const en: Record<DictKey, string> = {
 
   "nav.cards": "Cards",
   "nav.offers": "Offers",
-  "nav.account": "Account",
+  "nav.account": "Settings",
 
   "home.featured": "Featured",
   "home.featured_hint": "Tap to copy number",
@@ -198,7 +198,7 @@ const en: Record<DictKey, string> = {
   "field.number_optional": "Card number / ID (optional)",
   "field.number_placeholder": "e.g. 1234567890",
   "field.holder": "Cardholder name",
-  "field.holder_placeholder": "e.g. Nauval",
+  "field.holder_placeholder": "e.g. Cardte",
   "field.note": "Note",
   "field.note_placeholder": "Add a note (optional)",
 

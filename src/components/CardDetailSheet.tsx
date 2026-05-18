@@ -18,13 +18,14 @@ type Props = {
 
 export function CardDetailSheet({ open, card, onClose, initialEdit }: Props) {
   const { t } = useT();
-  const { update, remove } = useSavedCards();
+  const { update, remove, add } = useSavedCards();
   const [editing, setEditing] = useState(false);
 
   const [name, setName] = useState("");
   const [number, setNumber] = useState("");
   const [holder, setHolder] = useState("");
   const [note, setNote] = useState("");
+  const [isHero, setIsHero] = useState(false);
 
   useEffect(() => {
     if (card) {
@@ -32,6 +33,7 @@ export function CardDetailSheet({ open, card, onClose, initialEdit }: Props) {
       setNumber(card.number ?? "");
       setHolder(card.holder ?? "");
       setNote(card.note ?? "");
+      setIsHero(card.isHero ?? false);
       setEditing(!!initialEdit);
     }
   }, [card, initialEdit]);
@@ -64,13 +66,27 @@ export function CardDetailSheet({ open, card, onClose, initialEdit }: Props) {
   };
 
   const save = () => {
-    update(card.uid, {
-      name: name.trim() || card.name,
-      number: number.trim(),
-      holder: holder.trim(),
-      note: note.trim(),
-    });
-    setEditing(false);
+    if (!card) return;
+    if (card.uid === "NEW_CARD") {
+      add({
+        catalogId: card.catalogId,
+        name: name.trim() || card.name,
+        number: number.trim(),
+        holder: holder.trim(),
+        note: note.trim(),
+        isHero,
+        custom: card.custom,
+      });
+    } else {
+      update(card.uid, {
+        name: name.trim() || card.name,
+        number: number.trim(),
+        holder: holder.trim(),
+        note: note.trim(),
+        isHero,
+      });
+    }
+    onClose();
     toast(t("toast.saved"));
   };
 
@@ -134,11 +150,14 @@ export function CardDetailSheet({ open, card, onClose, initialEdit }: Props) {
               number={number}
               holder={holder}
               note={note}
+              isHero={isHero}
               setName={setName}
               setNumber={setNumber}
               setHolder={setHolder}
               setNote={setNote}
+              setIsHero={setIsHero}
               onDelete={onDelete}
+              isNew={card.uid === "NEW_CARD"}
             />
           )}
         </div>
@@ -219,11 +238,14 @@ function EditMode(props: {
   number: string;
   holder: string;
   note: string;
+  isHero: boolean;
   setName: (v: string) => void;
   setNumber: (v: string) => void;
   setHolder: (v: string) => void;
   setNote: (v: string) => void;
+  setIsHero: (v: boolean) => void;
   onDelete: () => void;
+  isNew?: boolean;
 }) {
   const { t } = useT();
   const {
@@ -232,11 +254,14 @@ function EditMode(props: {
     number,
     holder,
     note,
+    isHero,
     setName,
     setNumber,
     setHolder,
     setNote,
+    setIsHero,
     onDelete,
+    isNew,
   } = props;
 
   return (
@@ -245,12 +270,12 @@ function EditMode(props: {
         <CardTile card={tile} size="lg" />
       </div>
 
-      <div className="mt-6 space-y-3">
+      <div className="mt-8 space-y-4">
         <Field label={t("field.name")}>
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full bg-transparent text-sm focus:outline-none"
+            className="w-full bg-transparent text-base font-medium text-white placeholder:text-white/30 focus:outline-none"
           />
         </Field>
         <Field label={t("field.number")}>
@@ -260,7 +285,7 @@ function EditMode(props: {
             inputMode="numeric"
             pattern="[0-9]*"
             placeholder={t("field.number_placeholder")}
-            className="w-full bg-transparent text-sm placeholder:text-muted focus:outline-none"
+            className="w-full bg-transparent text-base font-medium text-white placeholder:text-white/30 focus:outline-none"
           />
         </Field>
         <Field label={t("field.holder")}>
@@ -268,7 +293,7 @@ function EditMode(props: {
             value={holder}
             onChange={(e) => setHolder(e.target.value)}
             placeholder={t("field.holder_placeholder")}
-            className="w-full bg-transparent text-sm placeholder:text-muted focus:outline-none"
+            className="w-full bg-transparent text-base font-medium text-white placeholder:text-white/30 focus:outline-none"
           />
         </Field>
         <Field label={t("field.note")}>
@@ -277,17 +302,38 @@ function EditMode(props: {
             onChange={(e) => setNote(e.target.value)}
             rows={3}
             placeholder={t("field.note_placeholder")}
-            className="w-full resize-none bg-transparent text-sm placeholder:text-muted focus:outline-none"
+            className="w-full resize-none bg-transparent text-base font-medium text-white placeholder:text-white/30 focus:outline-none"
           />
         </Field>
+
+        <div className="flex items-center justify-between rounded-2xl border border-white/[0.08] bg-white/[0.04] p-4 transition-colors focus-within:border-white/20">
+          <div className="flex flex-col">
+            <span className="text-sm font-bold tracking-wide text-white/90">Hero Card</span>
+            <span className="text-[11px] text-white/50">Jadikan kartu utama versi premium</span>
+          </div>
+          <button
+            onClick={() => setIsHero(!isHero)}
+            className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors ${
+              isHero ? "bg-white" : "bg-white/20"
+            }`}
+          >
+            <span
+              className={`inline-block h-4 w-4 transform rounded-full bg-black transition-transform ${
+                isHero ? "translate-x-6" : "translate-x-1"
+              }`}
+            />
+          </button>
+        </div>
       </div>
 
-      <button
-        onClick={onDelete}
-        className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-red-500/10 py-3 text-sm font-semibold text-red-400"
-      >
-        <Trash2 size={16} /> {t("detail.delete")}
-      </button>
+      {!isNew && (
+        <button
+          onClick={onDelete}
+          className="mt-8 flex w-full items-center justify-center gap-2 rounded-2xl border border-red-500/20 bg-red-500/10 py-3.5 text-sm font-bold text-red-400 transition active:scale-95 active:bg-red-500/20"
+        >
+          <Trash2 size={16} strokeWidth={2.5} /> {t("detail.delete")}
+        </button>
+      )}
     </>
   );
 }
@@ -295,12 +341,27 @@ function EditMode(props: {
 function CompactLogo({ tile }: { tile: any }) {
   return (
     <div className="inline-flex h-8 max-w-[180px] items-center overflow-hidden rounded-md">
-      <div
-        className="flex h-8 items-center justify-center px-2 text-sm font-extrabold tracking-tight"
-        style={{ backgroundColor: tile.bg, color: tile.fg ?? "#fff" }}
-      >
-        {String(tile.label).split("\n").join(" ")}
-      </div>
+      {tile.logo ? (
+        <div
+          className="flex h-8 w-full items-center justify-center px-3"
+          style={{ backgroundColor: tile.bg }}
+        >
+          <img
+            src={tile.logo}
+            alt={tile.label}
+            className={`h-full w-full max-h-[65%] max-w-[80%] object-contain drop-shadow-sm ${
+              tile.logoWhite ? "brightness-0 invert" : ""
+            } ${tile.logoClass || ""}`}
+          />
+        </div>
+      ) : (
+        <div
+          className="flex h-8 items-center justify-center px-2 text-sm font-extrabold tracking-tight"
+          style={{ backgroundColor: tile.bg, color: tile.fg ?? "#fff" }}
+        >
+          {String(tile.label).split("\n").join(" ")}
+        </div>
+      )}
     </div>
   );
 }
@@ -313,11 +374,11 @@ function Field({
   children: React.ReactNode;
 }) {
   return (
-    <label className="block rounded-xl bg-[#2c2c2e] px-3 py-2.5">
-      <span className="block text-[11px] uppercase tracking-wide text-muted">
+    <label className="block rounded-2xl border border-white/[0.08] bg-white/[0.04] px-4 py-3.5 transition-colors focus-within:border-white/20 focus-within:bg-white/[0.08]">
+      <span className="block text-[11px] font-bold uppercase tracking-wider text-white/50">
         {label}
       </span>
-      <div className="mt-1">{children}</div>
+      <div className="mt-1.5">{children}</div>
     </label>
   );
 }

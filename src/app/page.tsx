@@ -10,7 +10,6 @@ import { CustomCardSheet } from "@/components/CustomCardSheet";
 import { CardGridItem } from "@/components/CardGridItem";
 import { HeroCard } from "@/components/HeroCard";
 import { SearchInput } from "@/components/SearchInput";
-import { FloatingAddButton } from "@/components/FloatingAddButton";
 import { useSavedCards, SavedCard } from "@/lib/storage";
 import { findCatalog, CatalogCard } from "@/data/catalog";
 import { useT } from "@/lib/i18n";
@@ -34,9 +33,14 @@ export default function HomePage() {
       setCustomOpen(true);
       return;
     }
-    const created = add({ catalogId: item.id, name: item.name });
+    const draftCard: SavedCard = {
+      uid: "NEW_CARD",
+      catalogId: item.id,
+      name: item.name,
+      createdAt: Date.now(),
+    };
     setAddOpen(false);
-    setSelected(created);
+    setSelected(draftCard);
     setOpenInEdit(true);
   };
 
@@ -72,7 +76,11 @@ export default function HomePage() {
     });
   }, [cards, q, filter]);
 
-  const heroCards = cards.slice(0, 5);
+  const heroCards = useMemo(() => {
+    if (cards.length === 0) return [];
+    const hero = cards.find((c) => c.isHero);
+    return hero ? [hero] : [cards[0]];
+  }, [cards]);
 
   return (
     <main
@@ -120,7 +128,7 @@ export default function HomePage() {
       )}
 
       {loaded && cards.length === 0 && (
-        <EmptyState onAdd={() => setAddOpen(true)} />
+        <EmptyState onAdd={() => setAddOpen(true)} onPick={onPick} />
       )}
 
       {loaded && cards.length > 0 && (
@@ -167,12 +175,7 @@ export default function HomePage() {
         initialEdit={openInEdit}
       />
 
-      <FloatingAddButton
-        onClick={() => setAddOpen(true)}
-        ariaLabel={t("home.add_card_aria")}
-      />
-
-      <BottomNav />
+      <BottomNav onAdd={() => setAddOpen(true)} />
     </main>
   );
 }
@@ -189,31 +192,7 @@ function SectionTitle({
   return (
     <div className="mb-3 flex items-end justify-between px-5">
       <h2 className="text-base font-semibold tracking-tight">{title}</h2>
-      {subtitle && <span className="text-[11px] text-muted">{subtitle}</span>}
-    </div>
-  );
-}
-
-function Stat({
-  icon,
-  label,
-  value,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: number | string;
-}) {
-  return (
-    <div className="glass flex items-center gap-2 rounded-2xl px-3 py-2.5">
-      <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white/10 text-white">
-        {icon}
-      </span>
-      <div className="leading-tight">
-        <p className="text-[10px] uppercase tracking-wider text-muted">
-          {label}
-        </p>
-        <p className="text-base font-bold">{value}</p>
-      </div>
+      {subtitle && <span className="text-[11px] text-white/40">{subtitle}</span>}
     </div>
   );
 }
@@ -241,35 +220,33 @@ function Chip({
   );
 }
 
-function EmptyState({ onAdd }: { onAdd: () => void }) {
+function EmptyState({
+  onAdd,
+  onPick,
+}: {
+  onAdd: () => void;
+  onPick: (c: CatalogCard) => void;
+}) {
   const { t } = useT();
   const previews = [
-    "tiara-gatzu",
-    "alfamart",
-    "uniqlo",
-    "matahari",
-    "map",
+    "bca",
+    "bni",
+    "bri",
     "starbucks",
+    "adidas",
+    "alfamart",
   ];
 
   return (
     <section className="relative z-10 mt-8 px-5">
       <div className="glass relative overflow-hidden rounded-3xl p-6 text-center">
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -right-16 -top-16 h-44 w-44 rounded-full bg-fuchsia-500/40 blur-3xl"
-        />
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -bottom-20 -left-12 h-44 w-44 rounded-full bg-indigo-500/40 blur-3xl"
-        />
         <h3 className="relative text-xl font-bold">{t("empty.title")}</h3>
-        <p className="relative mt-1 text-sm text-muted">
+        <p className="relative mt-1 text-sm text-white/40">
           {t("empty.subtitle")}
         </p>
         <button
           onClick={onAdd}
-          className="relative mt-5 inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-black active:scale-95"
+          className="relative mt-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white px-5 py-2.5 text-sm font-semibold text-black active:scale-95"
         >
           <Plus size={16} /> {t("empty.cta")}
         </button>
@@ -281,7 +258,7 @@ function EmptyState({ onAdd }: { onAdd: () => void }) {
             return (
               <button
                 key={id}
-                onClick={onAdd}
+                onClick={() => onPick(c)}
                 className="overflow-hidden rounded-xl active:scale-[0.97]"
               >
                 <CardTile card={c} size="sm" />

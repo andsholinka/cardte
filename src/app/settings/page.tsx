@@ -8,6 +8,7 @@ import {
   ChevronRight,
   Lock,
   SlidersHorizontal,
+  LayoutGrid,
 } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { useSavedCards } from "@/lib/storage";
@@ -16,7 +17,10 @@ import {
   clearPin,
   getSortMode,
   setSortMode,
+  getLayoutMode,
+  setLayoutMode,
   type SortMode,
+  type LayoutMode,
 } from "@/lib/lock";
 import { toast } from "@/components/Toast";
 
@@ -28,12 +32,15 @@ export default function AdvancedSettingsPage() {
   const [lockOn, setLockOn] = useState(false);
   const [sort, setSort] = useState<SortMode>("recent");
   const [sortOpen, setSortOpen] = useState(false);
+  const [layoutMode, setLayoutModeState] = useState<LayoutMode>("grid");
+  const [layoutOpen, setLayoutOpen] = useState(false);
 
   // Refresh state when returning to this screen.
   useEffect(() => {
     const refresh = () => {
       setLockOn(hasPin());
       setSort(getSortMode());
+      setLayoutModeState(getLayoutMode());
     };
     refresh();
     window.addEventListener("focus", refresh);
@@ -65,8 +72,17 @@ export default function AdvancedSettingsPage() {
     setSortOpen(false);
   };
 
+  const pickLayout = (m: LayoutMode) => {
+    setLayoutMode(m);
+    setLayoutModeState(m);
+    setLayoutOpen(false);
+  };
+
   const sortLabel =
     sort === "name" ? t("adv.sort_name") : t("adv.sort_recent");
+
+  const layoutLabel =
+    layoutMode === "grid" ? t("adv.layout_grid") : t("adv.layout_stack");
 
   return (
     <main
@@ -142,6 +158,45 @@ export default function AdvancedSettingsPage() {
               caption={t("sort.by_name_caption")}
               selected={sort === "name"}
               onClick={() => pickSort("name")}
+            />
+          </div>
+        )}
+
+        <div className="mx-4 h-px bg-white/5" />
+
+        <button
+          onClick={() => setLayoutOpen((v) => !v)}
+          className="flex w-full items-center justify-between px-4 py-3.5 active:bg-white/5"
+        >
+          <span className="flex items-center gap-3">
+            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/5">
+              <LayoutGrid size={18} />
+            </span>
+            <span className="flex flex-col items-start">
+              <span className="text-[15px]">{t("adv.layout_title")}</span>
+              <span className="text-[12px] text-white/40">{layoutLabel}</span>
+            </span>
+          </span>
+          <ChevronRight
+            size={18}
+            className={`text-white/40 transition ${layoutOpen ? "rotate-90" : ""}`}
+          />
+        </button>
+
+        {layoutOpen && (
+          <div className="border-t border-white/5">
+            <SortRow
+              title={t("adv.layout_grid")}
+              caption={t("adv.layout_grid_caption")}
+              selected={layoutMode === "grid"}
+              onClick={() => pickLayout("grid")}
+            />
+            <div className="mx-4 h-px bg-white/5" />
+            <SortRow
+              title={t("adv.layout_stack")}
+              caption={t("adv.layout_stack_caption")}
+              selected={layoutMode === "stack"}
+              onClick={() => pickLayout("stack")}
             />
           </div>
         )}

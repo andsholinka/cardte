@@ -16,6 +16,7 @@ const DEFAULT_AUTOLOCK_S = 30;
 /* ----------------------------- types ----------------------------- */
 
 export type SortMode = "name" | "recent";
+export type LayoutMode = "grid" | "stack";
 
 type PinRecord = { salt: string; hash: string };
 type WebAuthnRecord = { credId: string };
@@ -304,6 +305,40 @@ export function useSortMode(): [SortMode, (m: SortMode) => void] {
   }, []);
   const update = useCallback((m: SortMode) => {
     setSortMode(m);
+    setMode(m);
+  }, []);
+  return [mode, update];
+}
+
+/* ----------------------------- Layout ----------------------------- */
+
+const KEY_LAYOUT = "cardte:layout:v1";
+
+export function getLayoutMode(): LayoutMode {
+  if (typeof window === "undefined") return "grid";
+  const raw = localStorage.getItem(KEY_LAYOUT);
+  return raw === "grid" || raw === "stack" ? raw : "grid";
+}
+
+export function setLayoutMode(m: LayoutMode): void {
+  localStorage.setItem(KEY_LAYOUT, m);
+  window.dispatchEvent(new CustomEvent("cardte:layout"));
+}
+
+export function useLayoutMode(): [LayoutMode, (m: LayoutMode) => void] {
+  const [mode, setMode] = useState<LayoutMode>("grid");
+  useEffect(() => {
+    setMode(getLayoutMode());
+    const onChange = () => setMode(getLayoutMode());
+    window.addEventListener("cardte:layout", onChange);
+    window.addEventListener("storage", onChange);
+    return () => {
+      window.removeEventListener("cardte:layout", onChange);
+      window.removeEventListener("storage", onChange);
+    };
+  }, []);
+  const update = useCallback((m: LayoutMode) => {
+    setLayoutMode(m);
     setMode(m);
   }, []);
   return [mode, update];

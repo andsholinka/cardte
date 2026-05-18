@@ -9,11 +9,12 @@ import { AddCardSheet } from "@/components/AddCardSheet";
 import { CardGridItem } from "@/components/CardGridItem";
 import { HeroCard } from "@/components/HeroCard";
 import { SearchInput } from "@/components/SearchInput";
+import { CardStack } from "@/components/CardStack";
 import { toast } from "@/components/Toast";
 import { useSavedCards, SavedCard } from "@/lib/storage";
 import { findCatalog, CatalogCard } from "@/data/catalog";
 import { useT } from "@/lib/i18n";
-import { useSortMode } from "@/lib/lock";
+import { useSortMode, useLayoutMode } from "@/lib/lock";
 
 const CardDetailSheet = dynamic(
   () => import("@/components/CardDetailSheet").then((m) => m.CardDetailSheet),
@@ -65,6 +66,7 @@ export default function HomePage() {
   const [q, setQ] = useState("");
   const [filter, setFilter] = useState<Filter>("all");
   const [sort] = useSortMode();
+  const [layout] = useLayoutMode();
 
   const openDetailFor = (
     item: CatalogCard,
@@ -148,7 +150,7 @@ export default function HomePage() {
       className="ambient-bg relative min-h-[100dvh] pb-32"
       style={{ paddingTop: "calc(env(safe-area-inset-top) + 8px)" }}
     >
-      {loaded && cards.length > 0 && (
+      {loaded && cards.length > 0 && layout === "grid" && (
         <div className="relative z-10">
           <HeroCard
             cards={heroCards}
@@ -165,7 +167,7 @@ export default function HomePage() {
       )}
 
       {loaded && cards.length > 0 && (
-        <section className="relative z-10 mt-5 px-5">
+        <section className={`relative z-10 px-5 ${layout === "stack" ? "mt-2" : "mt-5"}`}>
           <SearchInput
             value={q}
             onChange={setQ}
@@ -194,15 +196,19 @@ export default function HomePage() {
 
       {loaded && cards.length > 0 && (
         <section className="relative z-10 mt-5">
-          <SectionTitle
-            title={t("home.all_cards")}
-            subtitle={t("home.x_of_y", { x: filtered.length, y: cards.length })}
-          />
+          <div className="mb-3 flex items-end justify-between px-5">
+            <h2 className="text-base font-semibold tracking-tight">
+              {t("home.all_cards")}
+            </h2>
+            <span className="text-[11px] text-white/40">
+              {t("home.x_of_y", { x: filtered.length, y: cards.length })}
+            </span>
+          </div>
           {filtered.length === 0 ? (
             <p className="mt-4 text-center text-sm text-muted">
               {t("home.no_match")}
             </p>
-          ) : (
+          ) : layout === "grid" ? (
             <div className="grid grid-cols-3 gap-3 px-5">
               {filtered.map((c) => (
                 <CardGridItem
@@ -219,6 +225,18 @@ export default function HomePage() {
                 />
               ))}
             </div>
+          ) : (
+            <CardStack
+              cards={filtered}
+              onOpen={(card) => {
+                setSelected(card);
+                setOpenInEdit(false);
+              }}
+              onEdit={(card) => {
+                setSelected(card);
+                setOpenInEdit(true);
+              }}
+            />
           )}
         </section>
       )}
@@ -272,21 +290,6 @@ export default function HomePage() {
 }
 
 /* ----------------------- subcomponents ----------------------- */
-
-function SectionTitle({
-  title,
-  subtitle,
-}: {
-  title: string;
-  subtitle?: string;
-}) {
-  return (
-    <div className="mb-3 flex items-end justify-between px-5">
-      <h2 className="text-base font-semibold tracking-tight">{title}</h2>
-      {subtitle && <span className="text-[11px] text-white/40">{subtitle}</span>}
-    </div>
-  );
-}
 
 function Chip({
   active,

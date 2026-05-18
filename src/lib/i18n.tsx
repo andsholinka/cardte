@@ -199,6 +199,13 @@ const id = {
   "sort.by_name_caption": "A → Z",
   "sort.by_recent": "Terbaru ditambahkan",
   "sort.by_recent_caption": "Yang baru di atas",
+
+  // Layout
+  "adv.layout_title": "Tampilan kartu",
+  "adv.layout_grid": "Grid",
+  "adv.layout_grid_caption": "Kartu kecil 3 kolom",
+  "adv.layout_stack": "Stack",
+  "adv.layout_stack_caption": "Kartu bertumpuk 3D",
 } as const;
 
 type DictKey = keyof typeof id;
@@ -367,6 +374,12 @@ const en: Record<DictKey, string> = {
   "sort.by_name_caption": "A → Z",
   "sort.by_recent": "Recently added",
   "sort.by_recent_caption": "Newest first",
+
+  "adv.layout_title": "Card layout",
+  "adv.layout_grid": "Grid",
+  "adv.layout_grid_caption": "Small cards in 3 columns",
+  "adv.layout_stack": "Stack",
+  "adv.layout_stack_caption": "3D stacked cards",
 };
 
 const dicts: Record<Locale, Record<DictKey, string>> = { id, en };

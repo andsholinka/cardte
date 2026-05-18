@@ -25,16 +25,12 @@ const FORMAT_MAP: Record<string, string> = {
 function guessBcid(value: string): string {
   const v = value.trim();
   if (!v) return "code128";
-  // Numeric-only checks
   if (/^\d+$/.test(v)) {
     if (v.length === 13) return "ean13";
     if (v.length === 12) return "upca";
     if (v.length === 8) return "ean8";
-    if (v.length === 6) return "upce";
-    if (v.length % 2 === 0) return "interleaved2of5";
     return "code128";
   }
-  // CODE39 charset (uppercase + a few symbols)
   if (/^[A-Z0-9\-. $/+%]+$/.test(v)) return "code39";
   return "code128";
 }
@@ -53,22 +49,13 @@ function is2D(bcid: string): boolean {
 
 type Props = {
   value: string;
-  /** Saved BarcodeDetector format (e.g. "code_128"). Optional. */
   format?: string;
   className?: string;
-  /** Pixel scale passed to bwip-js. Higher = sharper. */
   scale?: number;
-  /** Bar height for 1D codes. */
   height?: number;
-  /** Show human-readable text under the bars. */
   includeText?: boolean;
 };
 
-/**
- * Renders a real, scannable barcode into a <canvas>. Falls back to a
- * styled placeholder if the value can't be encoded with the chosen
- * symbology (e.g. EAN-13 expects exactly 13 digits).
- */
 export function Barcode({
   value,
   format,
@@ -86,43 +73,68 @@ export function Barcode({
     let cancelled = false;
 
     const render = async () => {
-      // Lazy import keeps the 250kB encoder out of the home page bundle.
-      const mod = await import("bwip-js/browser");
-      if (cancelled) return;
-      const bwipjs = (mod as any).default ?? mod;
+      let toCanvas: ((canvas: HTMLCanvasElement, opts: any) => void) | null = null;
+      try {
+        const mod: any = await import("bwip-js/browser");
+        // bwip-js exports both `toCanvas` named and as a property on the default
+        if (typeof mod.toCanvas === "function") {
+          toCanvas = mod.toCanvas;
+        } else if (mod.default && typeof mod.default.toCanvas === "function") {
+          toCanvas = mod.default.toCanvas;
+        } else {
+          throw new Error("bwip-js toCanvas not found in module shape");
+        }
+      } catch (e) {
+        if (!cancelled) {
+          setError("Failed to load barcode library");
+          console.error("[Barcode] import failed", e);
+        }
+        return;
+      }
+      if (cancelled || !toCanvas) return;
 
       const detected = format ? FORMAT_MAP[format] : undefined;
-      const candidates = [
-        detected,
-        guessBcid(value),
-        "code128", // last-resort, accepts almost anything
-      ].filter(Boolean) as string[];
+      // Always end with code128 as the universal fallback
+      const candidates = Array.from(
+        new Set(
+          [detected, guessBcid(value), "code128"].filter(Boolean) as string[]
+        )
+      );
 
       let lastErr: unknown = null;
       let rendered = false;
+
       for (const bcid of candidates) {
         try {
-          bwipjs.toCanvas(canvas, {
+          const opts: Record<string, unknown> = {
             bcid,
             text: value,
             scale,
-            height: is2D(bcid) ? 30 : height,
-            width: is2D(bcid) ? 30 : undefined,
             includetext: includeText && !is2D(bcid),
             textxalign: "center",
             backgroundcolor: "FFFFFF",
-            paddingwidth: 6,
-            paddingheight: 6,
-          });
+          };
+          if (is2D(bcid)) {
+            opts.height = 30;
+            opts.width = 30;
+          } else {
+            opts.height = height;
+          }
+
+          toCanvas(canvas, opts);
           rendered = true;
-          setError(null);
+          if (!cancelled) setError(null);
           break;
         } catch (e) {
           lastErr = e;
+          console.warn(`[Barcode] ${bcid} failed:`, e);
         }
       }
       if (!rendered && !cancelled) {
-        setError(lastErr instanceof Error ? lastErr.message : "render failed");
+        const msg =
+          lastErr instanceof Error ? lastErr.message : String(lastErr);
+        setError(msg);
+        console.error("[Barcode] all encoders failed for value:", value);
       }
     };
 
@@ -143,7 +155,9 @@ export function Barcode({
     >
       <canvas ref={canvasRef} className="block max-w-full" />
       {error && (
-        <p className="mt-1 text-[11px] text-red-500">Unable to render barcode</p>
+        <p className="mt-1 text-[11px] text-red-500">
+          Unable to render barcode
+        </p>
       )}
     </div>
   );

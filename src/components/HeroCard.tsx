@@ -100,7 +100,7 @@ export function HeroCard({ cards, onEdit, onOpen }: Props) {
                 {t("hero.card_number")}
               </p>
               <p className="mt-1.5 truncate font-mono text-xl font-semibold tracking-wider text-white/90">
-                {formatNumber(active.number) || "•••• •••• •••• ••••"}
+                {displayNumber(active) || "•••• •••• •••• ••••"}
               </p>
               {active.holder && (
                 <p className="mt-1 text-xs text-white/40">
@@ -175,6 +175,23 @@ function pickTile(card: SavedCard) {
 function formatNumber(n?: string) {
   if (!n) return "";
   return n.replace(/(\d{4})(?=\d)/g, "$1 ");
+}
+
+/**
+ * For bank cards: mask all but last 4 digits (e.g. •••• •••• •••• 2323).
+ * For member cards: show full number with spacing.
+ */
+function displayNumber(card: SavedCard) {
+  if (!card.number) return "";
+  const cat = findCatalog(card.catalogId);
+  const isBank = cat?.category === "bank";
+  if (isBank && card.number.length > 4) {
+    const last4 = card.number.slice(-4);
+    const masked = card.number.slice(0, -4).replace(/\d/g, "•");
+    const full = masked + last4;
+    return full.replace(/(.{4})(?=.)/g, "$1 ");
+  }
+  return formatNumber(card.number);
 }
 
 function shade(hex: string, pct: number) {

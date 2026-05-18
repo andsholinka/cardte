@@ -41,6 +41,23 @@ const SUPPORTED_FORMATS = [
   "aztec",
 ];
 
+/**
+ * Returns a BarcodeDetector instance — native if available, otherwise
+ * the polyfill from `barcode-detector` (ZXing WASM).
+ */
+async function getDetector(): Promise<any> {
+  if (typeof window !== "undefined" && "BarcodeDetector" in window) {
+    try {
+      return new window.BarcodeDetector!({ formats: SUPPORTED_FORMATS });
+    } catch {
+      /* fall through to polyfill */
+    }
+  }
+  // Lazy-load the polyfill only when needed.
+  const { BarcodeDetector: Polyfill } = await import("barcode-detector");
+  return new Polyfill({ formats: SUPPORTED_FORMATS as any });
+}
+
 export function BarcodeScanSheet({
   open,
   card,
@@ -80,23 +97,13 @@ export function BarcodeScanSheet({
 
     const start = async () => {
       setError(null);
+      setSupported(true);
 
-      const hasDetector =
-        typeof window !== "undefined" && "BarcodeDetector" in window;
-
-      if (!hasDetector) {
+      try {
+        detectorRef.current = await getDetector();
+      } catch {
+        detectorRef.current = null;
         setSupported(false);
-        // We still try the camera so the preview shows, but detection won't run.
-      } else {
-        setSupported(true);
-        try {
-          detectorRef.current = new window.BarcodeDetector!({
-            formats: SUPPORTED_FORMATS,
-          });
-        } catch {
-          detectorRef.current = null;
-          setSupported(false);
-        }
       }
 
       try {
@@ -166,18 +173,11 @@ export function BarcodeScanSheet({
     e.target.value = "";
     if (!file) return;
 
-    if (typeof window === "undefined" || !("BarcodeDetector" in window)) {
-      setError(t("scan.no_detector"));
-      return;
-    }
-
     try {
-      const detector =
-        detectorRef.current ??
-        new window.BarcodeDetector!({ formats: SUPPORTED_FORMATS });
+      const detector = detectorRef.current ?? (await getDetector());
       const bmp = await createImageBitmap(file);
       const codes = await detector.detect(bmp);
-      bmp.close?.();
+      if (typeof bmp.close === "function") bmp.close();
       if (codes && codes.length > 0) {
         onResult({
           value: String(codes[0].rawValue ?? ""),

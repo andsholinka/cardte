@@ -39,12 +39,17 @@ export function CardDetailSheet({ open, card, onClose, initialEdit }: Props) {
 
   useEffect(() => {
     if (card) {
+      const catalog = findCatalog(card.catalogId);
+      const isBank = catalog?.category === "bank";
       setName(card.name);
       setNumber(card.number ?? "");
       setHolder(card.holder ?? "");
       setNote(card.note ?? "");
       setIsHero(card.isHero ?? false);
-      setHideBarcode(card.hideBarcode ?? false);
+      // Bank cards default to hideBarcode=true for new cards
+      setHideBarcode(
+        card.hideBarcode ?? (card.uid === "NEW_CARD" && isBank ? true : false)
+      );
       setEditing(!!initialEdit);
     }
   }, [card, initialEdit]);
@@ -338,10 +343,9 @@ function EditMode(props: {
         <Field label={t("field.number")}>
           <input
             value={number}
-            onChange={(e) =>
-              setNumber(e.target.value.replace(/[^0-9A-Za-z\-\s]/g, ""))
-            }
-            inputMode="text"
+            onChange={(e) => setNumber(e.target.value.replace(/\D/g, ""))}
+            inputMode="numeric"
+            pattern="[0-9]*"
             placeholder={t("field.number_placeholder")}
             className="w-full bg-transparent text-base font-medium text-white placeholder:text-white/30 focus:outline-none"
           />

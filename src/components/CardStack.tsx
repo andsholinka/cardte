@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useCallback } from "react";
+import { useRef, useState, useCallback, useEffect } from "react";
 import { SavedCard } from "@/lib/storage";
 import { findCatalog } from "@/data/catalog";
 import { CardTile } from "./CardTile";
@@ -15,19 +15,28 @@ type Props = {
 };
 
 const LONG_PRESS_MS = 500;
+const CARD_HEIGHT = 200;
+const PEEK = 50; // how much of each card below peeks out
 
 /**
- * 3D perspective stacked card view.
- * - Tap = copy card number
- * - Long press = open detail/edit
- * - No overlay on cards — clean look
+ * Apple Wallet-style stacked cards.
+ * All cards overlap with only PEEK pixels showing for each subsequent card.
+ * The whole stack is scrollable — as you scroll, the top card slides up
+ * revealing the next card fully. Simple, clean, no weird 3D distortion.
  */
-export function CardStack({ cards, onOpen, onEdit }: Props) {
+export function CardStack({ cards, onOpen }: Props) {
   const { t } = useT();
   const containerRef = useRef<HTMLDivElement>(null);
   const [scrollY, setScrollY] = useState(0);
+  const [mounted, setMounted] = useState(false);
   const pressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pressStartPos = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const didLongPress = useRef(false);
+
+  useEffect(() => {
+    const t = setTimeout(() => setMounted(true), 30);
+    return () => clearTimeout(t);
+  }, []);
 
   const onScroll = () => {
     if (containerRef.current) {
@@ -35,28 +44,44 @@ export function CardStack({ cards, onOpen, onEdit }: Props) {
     }
   };
 
-  const handlePointerDown = useCallback((card: SavedCard) => {
-    didLongPress.current = false;
-    pressTimer.current = setTimeout(() => {
-      didLongPress.current = true;
-      onOpen(card);
-    }, LONG_PRESS_MS);
-  }, [onOpen]);
+  const handlePointerDown = useCallback(
+    (card: SavedCard, e: React.PointerEvent) => {
+      didLongPress.current = false;
+      pressStartPos.current = { x: e.clientX, y: e.clientY };
+      pressTimer.current = setTimeout(() => {
+        didLongPress.current = true;
+        onOpen(card);
+      }, LONG_PRESS_MS);
+    },
+    [onOpen]
+  );
 
-  const handlePointerUp = useCallback(async (card: SavedCard) => {
-    if (pressTimer.current) {
+  const handlePointerUp = useCallback(
+    async (card: SavedCard) => {
+      if (pressTimer.current) {
+        clearTimeout(pressTimer.current);
+        pressTimer.current = null;
+      }
+      if (didLongPress.current) return;
+      if (!card.number) {
+        toast(t("toast.no_number"));
+        return;
+      }
+      const ok = await copyText(card.number);
+      toast(ok ? t("toast.copied", { name: card.name }) : t("toast.copy_failed"));
+    },
+    [t]
+  );
+
+  const handlePointerMove = useCallback((e: React.PointerEvent) => {
+    if (!pressTimer.current) return;
+    const dx = Math.abs(e.clientX - pressStartPos.current.x);
+    const dy = Math.abs(e.clientY - pressStartPos.current.y);
+    if (dx > 8 || dy > 8) {
       clearTimeout(pressTimer.current);
       pressTimer.current = null;
     }
-    if (didLongPress.current) return; // already handled
-    // Short tap = copy
-    if (!card.number) {
-      toast(t("toast.no_number"));
-      return;
-    }
-    const ok = await copyText(card.number);
-    toast(ok ? t("toast.copied", { name: card.name }) : t("toast.copy_failed"));
-  }, [t]);
+  }, []);
 
   const handlePointerCancel = useCallback(() => {
     if (pressTimer.current) {
@@ -65,49 +90,59 @@ export function CardStack({ cards, onOpen, onEdit }: Props) {
     }
   }, []);
 
-  const CARD_HEIGHT = 160;
-  const VISIBLE_GAP = 60;
-  const totalHeight = cards.length * VISIBLE_GAP + (CARD_HEIGHT - VISIBLE_GAP);
+  // Total scrollable height: first card full + rest just PEEK each
+  const totalHeight = CARD_HEIGHT + (cards.length - 1) * PEEK;
 
   return (
     <div
       ref={containerRef}
       onScroll={onScroll}
-      className="no-scrollbar relative overflow-y-auto px-5"
-      style={{
-        height: `min(${totalHeight + 40}px, 65dvh)`,
-        perspective: "1200px",
-        perspectiveOrigin: "50% 25%",
-      }}
+      className="no-scrollbar relative mx-5 overflow-y-auto overscroll-contain rounded-3xl"
+      style={{ height: `min(${totalHeight + 20}px, 70dvh)` }}
     >
-      <div
-        className="relative"
-        style={{ height: `${totalHeight}px` }}
-      >
+      <div style={{ height: `${totalHeight}px`, position: "relative" }}>
         {cards.map((card, i) => {
           const tile = getTile(card);
-          const yOffset = i * VISIBLE_GAP;
-          const distFromTop = yOffset - scrollY;
-          const normalizedDist = Math.max(0, Math.min(1, distFromTop / 320));
 
-          const rotateX = normalizedDist * 6;
-          const scale = 1 - normalizedDist * 0.02;
+          // Each card's resting position
+          const restY = i * PEEK;
+
+          // How much this card has been scrolled past
+          const scrolled = Math.max(0, scrollY - restY);
+          // The card "sticks" at its position until scrolled, then slides up
+          const y = Math.max(restY, restY + scrollY * 0 /* stays put */);
+
+          // Scale: cards further down are slightly smaller
+          const depth = i / Math.max(1, cards.length - 1);
+          const scale = 1 - depth * 0.03;
+
+          // Entrance
+          const entranceDelay = i * 70;
 
           return (
             <div
               key={card.uid}
-              onPointerDown={() => handlePointerDown(card)}
+              onPointerDown={(e) => handlePointerDown(card, e)}
               onPointerUp={() => handlePointerUp(card)}
+              onPointerMove={handlePointerMove}
               onPointerLeave={handlePointerCancel}
               onPointerCancel={handlePointerCancel}
               onContextMenu={(e) => e.preventDefault()}
-              className="absolute left-0 right-0 w-full cursor-pointer select-none overflow-hidden rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.5)] transition-transform duration-150 active:scale-[0.98]"
+              className="absolute left-0 right-0 cursor-pointer select-none overflow-hidden rounded-2xl"
               style={{
-                top: `${yOffset}px`,
+                top: `${restY}px`,
                 height: `${CARD_HEIGHT}px`,
-                transform: `rotateX(${rotateX}deg) scale(${scale})`,
+                transform: mounted
+                  ? `scale(${scale})`
+                  : `translateY(${40 + i * 15}px) scale(0.92)`,
                 transformOrigin: "50% 0%",
+                opacity: mounted ? 1 : 0,
                 zIndex: cards.length - i,
+                transition: mounted
+                  ? "transform 0.2s ease, box-shadow 0.2s ease"
+                  : `transform 0.5s cubic-bezier(0.22, 1, 0.36, 1) ${entranceDelay}ms,
+                     opacity 0.4s ease ${entranceDelay}ms`,
+                boxShadow: `0 ${2 + (cards.length - i) * 2}px ${8 + (cards.length - i) * 4}px rgba(0,0,0,0.4)`,
               }}
             >
               <CardTile card={tile} size="lg" />

@@ -1,18 +1,32 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import dynamic from "next/dynamic";
 import { Plus } from "lucide-react";
 import { CardTile } from "@/components/CardTile";
 import { BottomNav } from "@/components/BottomNav";
 import { AddCardSheet } from "@/components/AddCardSheet";
-import { CardDetailSheet } from "@/components/CardDetailSheet";
-import { CustomCardSheet } from "@/components/CustomCardSheet";
 import { CardGridItem } from "@/components/CardGridItem";
 import { HeroCard } from "@/components/HeroCard";
 import { SearchInput } from "@/components/SearchInput";
+import { toast } from "@/components/Toast";
 import { useSavedCards, SavedCard } from "@/lib/storage";
 import { findCatalog, CatalogCard } from "@/data/catalog";
 import { useT } from "@/lib/i18n";
+import { useSortMode } from "@/lib/lock";
+
+const CardDetailSheet = dynamic(
+  () => import("@/components/CardDetailSheet").then((m) => m.CardDetailSheet),
+  { ssr: false }
+);
+const CustomCardSheet = dynamic(
+  () => import("@/components/CustomCardSheet").then((m) => m.CustomCardSheet),
+  { ssr: false }
+);
+const BarcodeScanSheet = dynamic(
+  () => import("@/components/BarcodeScanSheet").then((m) => m.BarcodeScanSheet),
+  { ssr: false }
+);
 
 type Filter = "all" | "bank" | "member";
 
@@ -23,9 +37,51 @@ export default function HomePage() {
   const [customOpen, setCustomOpen] = useState(false);
   const [selected, setSelected] = useState<SavedCard | null>(null);
   const [openInEdit, setOpenInEdit] = useState(false);
+  const [scanCard, setScanCard] = useState<CatalogCard | null>(null);
+
+  // Handle ?pick= param from GlobalAddCard (when user picks from another page).
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const pick = params.get("pick");
+    if (!pick) return;
+    // Clean up the URL immediately.
+    window.history.replaceState({}, "", "/");
+    if (pick === "custom") {
+      setCustomOpen(true);
+    } else {
+      const cat = findCatalog(pick);
+      if (cat) {
+        if (cat.category === "member") {
+          setScanCard(cat);
+        } else {
+          openDetailFor(cat);
+        }
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const [q, setQ] = useState("");
   const [filter, setFilter] = useState<Filter>("all");
+  const [sort] = useSortMode();
+
+  const openDetailFor = (
+    item: CatalogCard,
+    extras?: { number?: string; barcode?: string; barcodeFormat?: string }
+  ) => {
+    const draftCard: SavedCard = {
+      uid: "NEW_CARD",
+      catalogId: item.id,
+      name: item.name,
+      number: extras?.number,
+      barcode: extras?.barcode,
+      barcodeFormat: extras?.barcodeFormat,
+      createdAt: Date.now(),
+    };
+    setSelected(draftCard);
+    setOpenInEdit(true);
+  };
 
   const onPick = (item: CatalogCard | "custom") => {
     if (item === "custom") {
@@ -33,15 +89,13 @@ export default function HomePage() {
       setCustomOpen(true);
       return;
     }
-    const draftCard: SavedCard = {
-      uid: "NEW_CARD",
-      catalogId: item.id,
-      name: item.name,
-      createdAt: Date.now(),
-    };
     setAddOpen(false);
-    setSelected(draftCard);
-    setOpenInEdit(true);
+    if (item.category === "member") {
+      // Stocard-style: scan the barcode first.
+      setScanCard(item);
+      return;
+    }
+    openDetailFor(item);
   };
 
   const closeDetail = () => {
@@ -62,7 +116,7 @@ export default function HomePage() {
 
   const filtered = useMemo(() => {
     const term = q.trim().toLowerCase();
-    return cards.filter((c) => {
+    const list = cards.filter((c) => {
       const cat = findCatalog(c.catalogId);
       const isBank = cat?.category === "bank";
       if (filter === "bank" && !isBank) return false;
@@ -74,7 +128,14 @@ export default function HomePage() {
         c.holder?.toLowerCase().includes(term)
       );
     });
-  }, [cards, q, filter]);
+
+    if (sort === "name") {
+      return [...list].sort((a, b) =>
+        a.name.localeCompare(b.name, undefined, { sensitivity: "base" })
+      );
+    }
+    return [...list].sort((a, b) => b.createdAt - a.createdAt);
+  }, [cards, q, filter, sort]);
 
   const heroCards = useMemo(() => {
     if (cards.length === 0) return [];
@@ -166,6 +227,36 @@ export default function HomePage() {
         open={addOpen}
         onClose={() => setAddOpen(false)}
         onPick={onPick}
+      />
+      <BarcodeScanSheet
+        open={!!scanCard}
+        card={scanCard}
+        onClose={() => setScanCard(null)}
+        onResult={(r) => {
+          const c = scanCard;
+          setScanCard(null);
+          if (c) {
+            const onlyDigits = r.value.replace(/\D+/g, "");
+            const isNumericFormat =
+              !r.format ||
+              r.format === "ean_13" ||
+              r.format === "ean_8" ||
+              r.format === "upc_a" ||
+              r.format === "upc_e" ||
+              r.format === "itf";
+            openDetailFor(c, {
+              number: isNumericFormat && onlyDigits ? onlyDigits : r.value,
+              barcode: r.value,
+              barcodeFormat: r.format,
+            });
+            toast(t("scan.scanned"));
+          }
+        }}
+        onManual={() => {
+          const c = scanCard;
+          setScanCard(null);
+          if (c) openDetailFor(c);
+        }}
       />
       <CustomCardSheet open={customOpen} onClose={() => setCustomOpen(false)} />
       <CardDetailSheet

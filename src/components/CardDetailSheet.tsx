@@ -1,13 +1,21 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
 import { SavedCard, useSavedCards } from "@/lib/storage";
 import { findCatalog } from "@/data/catalog";
 import { CardTile } from "./CardTile";
 import { copyText } from "@/lib/clipboard";
 import { toast } from "./Toast";
-import { Copy, Pencil, Trash2, X, Check } from "lucide-react";
+import { Copy, Pencil, Trash2, X, Check, EyeOff, Maximize2 } from "lucide-react";
 import { useT } from "@/lib/i18n";
+import { Barcode } from "./Barcode";
+
+const BarcodePresenter = dynamic(
+  () =>
+    import("./BarcodePresenter").then((m) => m.BarcodePresenter),
+  { ssr: false }
+);
 
 type Props = {
   open: boolean;
@@ -26,6 +34,8 @@ export function CardDetailSheet({ open, card, onClose, initialEdit }: Props) {
   const [holder, setHolder] = useState("");
   const [note, setNote] = useState("");
   const [isHero, setIsHero] = useState(false);
+  const [hideBarcode, setHideBarcode] = useState(false);
+  const [presenterOpen, setPresenterOpen] = useState(false);
 
   useEffect(() => {
     if (card) {
@@ -34,6 +44,7 @@ export function CardDetailSheet({ open, card, onClose, initialEdit }: Props) {
       setHolder(card.holder ?? "");
       setNote(card.note ?? "");
       setIsHero(card.isHero ?? false);
+      setHideBarcode(card.hideBarcode ?? false);
       setEditing(!!initialEdit);
     }
   }, [card, initialEdit]);
@@ -75,6 +86,9 @@ export function CardDetailSheet({ open, card, onClose, initialEdit }: Props) {
         holder: holder.trim(),
         note: note.trim(),
         isHero,
+        hideBarcode,
+        barcode: card.barcode,
+        barcodeFormat: card.barcodeFormat,
         custom: card.custom,
       });
     } else {
@@ -84,6 +98,7 @@ export function CardDetailSheet({ open, card, onClose, initialEdit }: Props) {
         holder: holder.trim(),
         note: note.trim(),
         isHero,
+        hideBarcode,
       });
     }
     onClose();
@@ -141,7 +156,12 @@ export function CardDetailSheet({ open, card, onClose, initialEdit }: Props) {
 
         <div className="no-scrollbar flex-1 overflow-y-auto px-4 pb-10">
           {!editing ? (
-            <ViewMode tile={tile} card={card} onCopy={onCopy} />
+            <ViewMode
+              tile={tile}
+              card={card}
+              onCopy={onCopy}
+              onPresent={() => setPresenterOpen(true)}
+            />
           ) : (
             <EditMode
               tile={tile}
@@ -151,17 +171,27 @@ export function CardDetailSheet({ open, card, onClose, initialEdit }: Props) {
               holder={holder}
               note={note}
               isHero={isHero}
+              hideBarcode={hideBarcode}
               setName={setName}
               setNumber={setNumber}
               setHolder={setHolder}
               setNote={setNote}
               setIsHero={setIsHero}
+              setHideBarcode={setHideBarcode}
               onDelete={onDelete}
               isNew={card.uid === "NEW_CARD"}
             />
           )}
         </div>
       </div>
+
+      <BarcodePresenter
+        open={presenterOpen}
+        value={card.barcode || card.number || ""}
+        format={card.barcodeFormat}
+        title={card.name}
+        onClose={() => setPresenterOpen(false)}
+      />
     </div>
   );
 }
@@ -170,12 +200,17 @@ function ViewMode({
   tile,
   card,
   onCopy,
+  onPresent,
 }: {
   tile: any;
   card: SavedCard;
   onCopy: () => void;
+  onPresent: () => void;
 }) {
   const { t } = useT();
+  const showBarcode =
+    !card.hideBarcode && !!(card.barcode || card.number);
+
   return (
     <>
       <div className="mx-auto mt-4 w-full max-w-xs">
@@ -206,11 +241,26 @@ function ViewMode({
         </span>
       </button>
 
-      {card.number && (
-        <div className="mx-auto mt-4 w-full max-w-xs rounded-xl bg-white p-4">
-          <div className="barcode-stripes h-16 w-full" />
-          <p className="mt-2 text-center text-xs tracking-widest text-black">
-            {card.number}
+      {showBarcode && (
+        <div className="mx-auto mt-4 w-full max-w-xs">
+          <button
+            type="button"
+            onClick={onPresent}
+            className="group relative block w-full overflow-hidden rounded-xl bg-white shadow-lg transition active:scale-[0.99]"
+            aria-label={t("barcode.tap_hint")}
+          >
+            <Barcode
+              value={card.barcode || card.number || ""}
+              format={card.barcodeFormat}
+              includeText
+              className="!shadow-none"
+            />
+            <span className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-black/70 text-white">
+              <Maximize2 size={14} />
+            </span>
+          </button>
+          <p className="mt-2 text-center text-[11px] text-white/40">
+            {t("barcode.tap_hint")}
           </p>
         </div>
       )}
@@ -239,30 +289,37 @@ function EditMode(props: {
   holder: string;
   note: string;
   isHero: boolean;
+  hideBarcode: boolean;
   setName: (v: string) => void;
   setNumber: (v: string) => void;
   setHolder: (v: string) => void;
   setNote: (v: string) => void;
   setIsHero: (v: boolean) => void;
+  setHideBarcode: (v: boolean) => void;
   onDelete: () => void;
   isNew?: boolean;
 }) {
   const { t } = useT();
   const {
     tile,
+    card,
     name,
     number,
     holder,
     note,
     isHero,
+    hideBarcode,
     setName,
     setNumber,
     setHolder,
     setNote,
     setIsHero,
+    setHideBarcode,
     onDelete,
     isNew,
   } = props;
+
+  const hasBarcode = !!(card.barcode || number);
 
   return (
     <>
@@ -281,9 +338,10 @@ function EditMode(props: {
         <Field label={t("field.number")}>
           <input
             value={number}
-            onChange={(e) => setNumber(e.target.value.replace(/\D+/g, ""))}
-            inputMode="numeric"
-            pattern="[0-9]*"
+            onChange={(e) =>
+              setNumber(e.target.value.replace(/[^0-9A-Za-z\-\s]/g, ""))
+            }
+            inputMode="text"
             placeholder={t("field.number_placeholder")}
             className="w-full bg-transparent text-base font-medium text-white placeholder:text-white/30 focus:outline-none"
           />
@@ -308,8 +366,8 @@ function EditMode(props: {
 
         <div className="flex items-center justify-between rounded-2xl border border-white/[0.08] bg-white/[0.04] p-4 transition-colors focus-within:border-white/20">
           <div className="flex flex-col">
-            <span className="text-sm font-bold tracking-wide text-white/90">Hero Card</span>
-            <span className="text-[11px] text-white/50">Jadikan kartu utama versi premium</span>
+            <span className="text-sm font-bold tracking-wide text-white/90">{t("hero.toggle_title")}</span>
+            <span className="text-[11px] text-white/50">{t("hero.toggle_caption")}</span>
           </div>
           <button
             onClick={() => setIsHero(!isHero)}
@@ -324,6 +382,37 @@ function EditMode(props: {
             />
           </button>
         </div>
+
+        {hasBarcode && (
+          <div className="flex items-center justify-between rounded-2xl border border-white/[0.08] bg-white/[0.04] p-4">
+            <div className="flex items-center gap-3">
+              <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/5">
+                <EyeOff size={16} />
+              </span>
+              <div className="flex flex-col">
+                <span className="text-sm font-bold tracking-wide text-white/90">
+                  {t("barcode.hide_label")}
+                </span>
+                <span className="text-[11px] text-white/50">
+                  {t("barcode.hide_caption")}
+                </span>
+              </div>
+            </div>
+            <button
+              onClick={() => setHideBarcode(!hideBarcode)}
+              className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors ${
+                hideBarcode ? "bg-white" : "bg-white/20"
+              }`}
+              aria-label={t("barcode.hide_label")}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-black transition-transform ${
+                  hideBarcode ? "translate-x-6" : "translate-x-1"
+                }`}
+              />
+            </button>
+          </div>
+        )}
       </div>
 
       {!isNew && (

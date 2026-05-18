@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { BottomNav } from "@/components/BottomNav";
 import { useSavedCards } from "@/lib/storage";
 import {
@@ -9,6 +10,7 @@ import {
   ChevronRight,
   Languages,
   Check,
+  SlidersHorizontal,
 } from "lucide-react";
 import { useT, type Locale } from "@/lib/i18n";
 
@@ -105,6 +107,19 @@ export default function AccountPage() {
 
       {/* Actions */}
       <section className="relative z-10 mx-5 mt-3 overflow-hidden rounded-2xl glass">
+        <Link
+          href="/settings"
+          className="flex w-full items-center justify-between px-4 py-3.5 active:bg-white/5"
+        >
+          <span className="flex items-center gap-3 text-sm">
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/5">
+              <SlidersHorizontal size={18} />
+            </span>
+            {t("account.advanced")}
+          </span>
+          <ChevronRight size={16} className="opacity-60" />
+        </Link>
+        <div className="mx-4 h-px bg-white/5" />
         <button
           onClick={onClear}
           className="flex w-full items-center justify-between px-4 py-3.5 text-red-400 active:bg-white/5"

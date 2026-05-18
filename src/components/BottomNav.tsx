@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { WalletCards, Plus, Settings2 } from "lucide-react";
 import { useT } from "@/lib/i18n";
+import { emitOpenAddCard } from "@/lib/events";
 
 type Props = {
   onAdd?: () => void;
@@ -15,6 +16,14 @@ export function BottomNav({ onAdd }: Props) {
 
   const isCards = pathname === "/";
   const isAccount = pathname?.startsWith("/account");
+
+  const handleAdd = () => {
+    if (onAdd) {
+      onAdd();
+    } else {
+      emitOpenAddCard();
+    }
+  };
 
   return (
     <div
@@ -35,7 +44,7 @@ export function BottomNav({ onAdd }: Props) {
 
         {/* Center: Add Button */}
         <button
-          onClick={onAdd}
+          onClick={handleAdd}
           aria-label={t("home.add_card_aria")}
           className="flex h-[48px] w-[48px] items-center justify-center rounded-full bg-white text-black shadow-lg transition active:scale-95"
         >

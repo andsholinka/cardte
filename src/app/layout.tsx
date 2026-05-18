@@ -3,6 +3,8 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { ToastHost } from "@/components/Toast";
 import { I18nProvider } from "@/lib/i18n";
+import { AppLockGate } from "@/components/AppLockGate";
+import { GlobalAddCard } from "@/components/GlobalAddCard";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -48,7 +50,10 @@ export default function RootLayout({
     <html lang="id" className={inter.variable}>
       <body className="bg-black text-white font-sans antialiased">
         <I18nProvider>
-          <div className="mx-auto min-h-[100dvh] max-w-md">{children}</div>
+          <AppLockGate>
+            <div className="mx-auto min-h-[100dvh] max-w-md">{children}</div>
+          </AppLockGate>
+          <GlobalAddCard />
           <ToastHost />
         </I18nProvider>
       </body>

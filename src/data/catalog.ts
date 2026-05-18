@@ -31,7 +31,7 @@ export type CatalogCard = {
 export const BANKS: CatalogCard[] = [
   // BUMN & swasta besar
   { id: "bca", name: "BCA", category: "bank", bg: "#0060A8", label: "BCA", style: "wordmark", logo: "https://upload.wikimedia.org/wikipedia/commons/5/5c/Bank_Central_Asia.svg", logoWhite: true },
-  { id: "mandiri", name: "Mandiri", category: "bank", bg: "#003D79", label: "mandiri", style: "wordmark", logo: "https://upload.wikimedia.org/wikipedia/commons/a/a2/Logo_Bank_Mandiri.svg", logoWhite: true },
+  { id: "mandiri", name: "Mandiri", category: "bank", bg: "#003D79", label: "mandiri", style: "wordmark", logo: "https://upload.wikimedia.org/wikipedia/commons/a/ad/Bank_Mandiri_logo_2016.svg", logoWhite: true },
   { id: "bri", name: "BRI", category: "bank", bg: "#00529C", label: "BRI", style: "wordmark", logo: "https://upload.wikimedia.org/wikipedia/commons/2/2e/BRI_2020.svg", logoWhite: true },
   { id: "bni", name: "BNI", category: "bank", bg: "#F26522", label: "BNI", style: "wordmark", logo: "/logo/bni.png", logoWhite: false, logoClass: "scale-[2.5]" },
   { id: "btn", name: "BTN", category: "bank", bg: "#003F7F", label: "BTN", sub: "Bank BTN", style: "wordmark" },

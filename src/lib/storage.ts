@@ -15,6 +15,10 @@ export type SavedCard = {
   holder?: string;
   /** optional barcode value */
   barcode?: string;
+  /** detected barcode format (e.g. "code_128", "ean_13", "qr_code") */
+  barcodeFormat?: string;
+  /** when true, hide the barcode in the card detail view */
+  hideBarcode?: boolean;
   /** optional pin/note */
   note?: string;
   /** whether this is the premium hero card */

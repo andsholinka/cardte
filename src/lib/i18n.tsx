@@ -41,9 +41,9 @@ const id = {
   "stats.member": "Member",
 
   // Empty
-  "empty.title": "Mulai dompet digitalmu",
+  "empty.title": "Semua kartumu, satu tempat",
   "empty.subtitle":
-    "Simpan kartu bank dan member di satu tempat. Aman tersimpan di perangkatmu sendiri.",
+    "Simpan kartu bank dan member di sini. Aman tersimpan di perangkatmu, tanpa server.",
   "empty.cta": "Tambah kartu pertama",
 
   // Hero
@@ -75,6 +75,31 @@ const id = {
   "add.no_results": "Tidak ada hasil",
   "add.bank_label": "Bank",
   "add.member_label": "Member",
+
+  // Barcode scan
+  "scan.subtitle": "Pindai barcode kartumu",
+  "scan.cant_scan": "Kartumu tidak bisa di-scan?",
+  "scan.enter_manually": "Masukkan manual",
+  "scan.add_from_photo": "Tambahkan dari foto",
+  "scan.camera_denied":
+    "Kamera tidak tersedia. Masukkan nomor secara manual.",
+  "scan.no_code": "Barcode tidak ditemukan di gambar.",
+  "scan.no_detector":
+    "Pemindai barcode tidak didukung di browser ini.",
+  "scan.scanned": "Barcode terbaca",
+
+  // Barcode display / presentation
+  "barcode.hide_label": "Sembunyikan barcode",
+  "barcode.hide_caption": "Hanya tampilkan nomor di detail kartu",
+  "barcode.tap_hint": "Tap barcode untuk tampilan kasir",
+  "barcode.present_close": "Tutup",
+  "barcode.present_rotate": "Putar",
+  "barcode.no_wakelock":
+    "Layar mungkin akan mati otomatis di browser ini.",
+
+  // Hero toggle
+  "hero.toggle_title": "Hero Card",
+  "hero.toggle_caption": "Jadikan kartu utama versi premium",
 
   // Detail sheet
   "detail.edit_title": "Edit Kartu",
@@ -128,6 +153,52 @@ const id = {
   "account.import_fail": "Gagal mengimpor file",
   "account.cleared": "Semua kartu telah dihapus",
   "account.footer": "v0.1 — dibuat dengan ❤️ di Indonesia",
+
+  // Advanced settings
+  "adv.title": "Pengaturan Lanjutan",
+  "adv.lock_title": "Kunci dengan Biometrik",
+  "adv.lock_state_on": "Aktif",
+  "adv.lock_state_off": "Nonaktif",
+  "adv.sort_title": "Urutan kartu",
+  "adv.sort_name": "Nama",
+  "adv.sort_recent": "Terbaru",
+  "adv.danger_question": "Ingin berhenti memakai Cardte?",
+  "adv.danger_action": "Hapus semua data dari aplikasi",
+  "adv.danger_confirm":
+    "Tindakan ini akan menghapus semua kartu, PIN, dan biometrik. Lanjutkan?",
+
+  // Lock screen
+  "lock.setup_title": "Kunci dengan Biometrik",
+  "lock.setup_body":
+    "Gunakan biometrik perangkat untuk mengunci Cardte. Sebagai cadangan, masukkan PIN.",
+  "lock.pin_label": "PIN",
+  "lock.pin_placeholder": "PIN (4-8 digit)",
+  "lock.confirm_label": "Konfirmasi PIN",
+  "lock.enable_biometric": "AKTIFKAN BIOMETRIK",
+  "lock.enable_pin_only": "AKTIFKAN PIN SAJA",
+  "lock.disable": "Matikan Kunci",
+  "lock.disable_confirm":
+    "Masukkan PIN untuk mematikan kunci.",
+  "lock.unlock_title": "Cardte Terkunci",
+  "lock.unlock_subtitle": "Buka dengan biometrik atau PIN.",
+  "lock.use_biometric": "Buka dengan Biometrik",
+  "lock.wrong_pin": "PIN salah",
+  "lock.pin_mismatch": "PIN tidak cocok",
+  "lock.pin_too_short": "Minimal 4 digit",
+  "lock.bio_failed": "Biometrik gagal, gunakan PIN.",
+  "lock.bio_unsupported": "Biometrik tidak didukung di perangkat ini.",
+  "lock.enabled": "Kunci diaktifkan",
+  "lock.disabled": "Kunci dinonaktifkan",
+
+  // Account row to advanced
+  "account.advanced": "Pengaturan Lanjutan",
+
+  // Sort sheet
+  "sort.title": "Urutan kartu",
+  "sort.by_name": "Berdasarkan nama",
+  "sort.by_name_caption": "A → Z",
+  "sort.by_recent": "Terbaru ditambahkan",
+  "sort.by_recent_caption": "Yang baru di atas",
 } as const;
 
 type DictKey = keyof typeof id;
@@ -155,9 +226,9 @@ const en: Record<DictKey, string> = {
   "stats.bank": "Bank",
   "stats.member": "Member",
 
-  "empty.title": "Start your digital wallet",
+  "empty.title": "All your cards, one place",
   "empty.subtitle":
-    "Keep your bank and member cards in one place. Safely stored on your own device.",
+    "Keep your bank and member cards here. Safely stored on your device, no server needed.",
   "empty.cta": "Add your first card",
 
   "hero.card_number": "Card Number",
@@ -185,6 +256,28 @@ const en: Record<DictKey, string> = {
   "add.no_results": "No results",
   "add.bank_label": "Bank",
   "add.member_label": "Member",
+
+  "scan.subtitle": "Scan your card's barcode",
+  "scan.cant_scan": "Your card won't scan?",
+  "scan.enter_manually": "Enter manually",
+  "scan.add_from_photo": "Add from photo",
+  "scan.camera_denied":
+    "Camera unavailable. Enter the number manually.",
+  "scan.no_code": "No barcode found in the image.",
+  "scan.no_detector":
+    "Barcode scanning isn't supported in this browser.",
+  "scan.scanned": "Barcode detected",
+
+  "barcode.hide_label": "Hide barcode",
+  "barcode.hide_caption": "Only show the number on the card detail",
+  "barcode.tap_hint": "Tap the barcode for cashier view",
+  "barcode.present_close": "Close",
+  "barcode.present_rotate": "Rotate",
+  "barcode.no_wakelock":
+    "Screen may dim automatically in this browser.",
+
+  "hero.toggle_title": "Hero Card",
+  "hero.toggle_caption": "Make this your featured premium card",
 
   "detail.edit_title": "Edit Card",
   "detail.edit": "Edit",
@@ -232,6 +325,48 @@ const en: Record<DictKey, string> = {
   "account.import_fail": "Failed to import file",
   "account.cleared": "All cards deleted",
   "account.footer": "v0.1 — made with ❤️ in Indonesia",
+
+  "adv.title": "Advanced Settings",
+  "adv.lock_title": "Lock with Biometrics",
+  "adv.lock_state_on": "Enabled",
+  "adv.lock_state_off": "Disabled",
+  "adv.sort_title": "Sort cards list",
+  "adv.sort_name": "Name",
+  "adv.sort_recent": "Recent",
+  "adv.danger_question": "Want to break up with us?",
+  "adv.danger_action": "Delete all data from the app",
+  "adv.danger_confirm":
+    "This will erase all cards, PIN, and biometrics. Continue?",
+
+  "lock.setup_title": "Lock with Biometrics",
+  "lock.setup_body":
+    "Use device biometrics to lock Cardte. As a fallback, enter a PIN.",
+  "lock.pin_label": "PIN",
+  "lock.pin_placeholder": "PIN (4-8 digits)",
+  "lock.confirm_label": "Confirm PIN",
+  "lock.enable_biometric": "ENABLE BIOMETRICS",
+  "lock.enable_pin_only": "ENABLE PIN ONLY",
+  "lock.disable": "Turn off Lock",
+  "lock.disable_confirm":
+    "Enter PIN to turn off lock.",
+  "lock.unlock_title": "Cardte Locked",
+  "lock.unlock_subtitle": "Unlock with biometrics or PIN.",
+  "lock.use_biometric": "Unlock with Biometrics",
+  "lock.wrong_pin": "Wrong PIN",
+  "lock.pin_mismatch": "PINs don't match",
+  "lock.pin_too_short": "Minimum 4 digits",
+  "lock.bio_failed": "Biometrics failed, use PIN.",
+  "lock.bio_unsupported": "Biometrics not supported on this device.",
+  "lock.enabled": "Lock enabled",
+  "lock.disabled": "Lock disabled",
+
+  "account.advanced": "Advanced Settings",
+
+  "sort.title": "Sort cards list",
+  "sort.by_name": "By name",
+  "sort.by_name_caption": "A → Z",
+  "sort.by_recent": "Recently added",
+  "sort.by_recent_caption": "Newest first",
 };
 
 const dicts: Record<Locale, Record<DictKey, string>> = { id, en };

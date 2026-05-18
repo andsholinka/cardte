@@ -18,8 +18,8 @@ export function BottomNav({ onAdd }: Props) {
 
   return (
     <div
-      className="fixed inset-x-0 bottom-6 z-30 mx-auto w-full max-w-[300px] px-4"
-      style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+      className="fixed inset-x-0 bottom-0 z-30 mx-auto w-full max-w-[300px] px-4"
+      style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 12px)" }}
     >
       <nav className="relative flex h-[64px] w-full items-center justify-between rounded-full border border-white/20 bg-white/[0.12] px-4 shadow-[0_8px_32px_rgba(0,0,0,0.5)] backdrop-blur-xl saturate-[150%]">
         {/* Left: Cards */}

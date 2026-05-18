@@ -11,9 +11,9 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Cardte — Simpan Kartumu di Satu Tempat",
+  title: "Cardte — All your cards, one tap away",
   description:
-    "Cardte adalah aplikasi sederhana untuk menyimpan kartu bank dan kartu member favoritmu. Data tersimpan aman di perangkatmu.",
+    "Your cards. Simplified. Store bank cards and memberships securely on your device — no server, no sign-up.",
   manifest: "/manifest.json",
   applicationName: "Cardte",
   appleWebApp: {
